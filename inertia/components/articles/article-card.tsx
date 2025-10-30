@@ -18,6 +18,8 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   const [imgError, setImgError] = useState(false)
   const showFallback = imgError || !article.coverImage
 
+  console.log('article.coverImage', article.coverImage)
+
   return (
     <div className="bg-white rounded-xl shadow flex flex-col h-full cursor-pointer overflow-hidden border-2 border-gray-200 transition-all duration-300 hover:border-indigo-600">
       <div

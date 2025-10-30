@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react'
 import Navbar from '../../components/navbar'
+import Footer from '../../components/footer'
 
 export default function DiscussionsIndex({ discussions }: any) {
   return (
@@ -39,6 +40,7 @@ export default function DiscussionsIndex({ discussions }: any) {
           ))}
         </div>
       </div>
+      <Footer />
     </>
   )
 } 

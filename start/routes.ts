@@ -57,6 +57,9 @@ router.get('/:username', [ProfileController, 'show']).where('username', '@.*').a
 router
   .group(() => {
     router.get('dashboard', [ArticlesController, 'dashboard']).as('dashboard')
+    router.get('dashboard/articles', [ArticlesController, 'articles']).as('dashboard.articles')
+    router.get('dashboard/articles/:slug/edit', [ArticlesController, 'edit']).as('dashboard.articles.edit')
+    router.put('dashboard/articles/:slug', [ArticlesController, 'update']).as('dashboard.articles.update')
   })
   .middleware(middleware.auth())
 
@@ -104,4 +107,17 @@ router
 router
   .post('discussions/:id/ban', [DiscussionsController, 'ban'])
   .as('discussions.ban')
-  .middleware(middleware.auth())
+  .middleware(middleware.admin())
+
+router
+  .delete('discussions/:id', [DiscussionsController, 'destroy'])
+  .as('discussions.destroy')
+  .middleware(middleware.admin())
+
+// Admin routes for articles
+router
+  .group(() => {
+    router.get('admin/articles', [ArticlesController, 'adminArticles']).as('admin.articles')
+    router.post('admin/articles/:slug/unpublish', [ArticlesController, 'unpublish']).as('admin.articles.unpublish')
+  })
+  .middleware(middleware.admin())

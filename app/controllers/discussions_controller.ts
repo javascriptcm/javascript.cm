@@ -56,34 +56,50 @@ export default class DiscussionsController {
     return response.redirect().toRoute('discussions.show', { id: discussion.id })
   }
 
-  async destroy({ params, auth, response }: HttpContext) {
-    // Suppression par admin
-    // (Vérifier le rôle admin dans la logique réelle)
-    const discussion = await Discussion.findOrFail(params.id)
+  async destroy({ params, response, session }: HttpContext) {
+    // Suppression par admin uniquement (vérifiée par middleware)
+    const discussion = await Discussion.query()
+      .where('id', params.id)
+      .preload('messages')
+      .preload('bans')
+      .firstOrFail()
+
+    // Supprimer tous les messages associés
+    await Message.query().where('discussion_id', discussion.id).delete()
+
+    // Supprimer tous les bans associés
+    await BannedUser.query().where('discussion_id', discussion.id).delete()
+
+    // Supprimer la discussion
     await discussion.delete()
+
+    session.flash('success', 'Discussion supprimée avec succès')
     return response.redirect().toRoute('discussions.index')
   }
 
   async ban({ params, request, auth, response }: HttpContext) {
-    if (auth.user?.role !== 'ADMIN') {
-      return response.unauthorized('Réservé admin')
-    }
+    // Bannissement par admin uniquement (vérifiée par middleware)
     const { userId, reason } = request.only(['userId', 'reason'])
     const discussionId = params.id
+
     // Vérifier si déjà banni
     const existing = await BannedUser.query()
       .where('user_id', userId)
       .where('discussion_id', discussionId)
       .first()
+
     if (existing) {
-      return response.badRequest('Déjà banni')
+      return response.badRequest({ error: 'Utilisateur déjà banni de cette discussion' })
     }
+
+    // Créer le ban
     await BannedUser.create({
       userId,
       discussionId,
-      adminId: auth.user.id,
+      adminId: auth.user!.id,
       reason: reason || null,
     })
-    return response.ok({ success: true })
+
+    return response.ok({ success: true, message: 'Utilisateur banni avec succès' })
   }
 }

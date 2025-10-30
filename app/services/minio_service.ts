@@ -25,13 +25,25 @@ export default class MinioService {
   }
 
   static async getPresignedUrl(fileName: string, mimeType: string) {
+    // S'assurer que le bucket existe
+    const exists = await minioClient.bucketExists(BUCKET)
+    if (!exists) {
+      await minioClient.makeBucket(BUCKET)
+    }
+
     const ext = fileName.split('.').pop()
     const key = `${uuidv4()}.${ext}`
     const url = await minioClient.presignedPutObject(BUCKET, key, 60 * 5)
-    return { url, key }
+    return { url, key, mimeType }
   }
 
   static async getPresignedViewUrl(key: string, expirySeconds = 300): Promise<string> {
+    // S'assurer que le bucket existe
+    const exists = await minioClient.bucketExists(BUCKET)
+    if (!exists) {
+      await minioClient.makeBucket(BUCKET)
+    }
+
     return minioClient.presignedGetObject(BUCKET, key, expirySeconds)
   }
 }
