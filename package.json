@@ -29,7 +29,9 @@
     "#database/*": "./database/*.js",
     "#tests/*": "./tests/*.js",
     "#start/*": "./start/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#enums/*": "./enums/*.js",
+    "#mock-data/*": "./mock-data/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -44,6 +46,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.3",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
     "hot-hook": "^0.4.0",
@@ -68,16 +71,27 @@
     "@heroicons/react": "^2.2.0",
     "@inertiajs/react": "^2.0.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/react-query": "^5.77.2",
+    "@types/date-fns": "^2.5.3",
     "@uiw/react-md-editor": "^4.0.5",
     "@vinejs/vine": "^3.0.0",
+    "axios": "^1.9.0",
+    "date-fns": "^4.1.0",
     "edge.js": "^6.2.0",
+    "lucide-react": "^0.511.0",
     "luxon": "^3.5.0",
+    "minio": "^8.0.5",
     "mysql2": "^3.12.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.0.0",
+    "react-syntax-highlighter": "^15.5.0",
     "reflect-metadata": "^0.2.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
+    "uuid": "^11.1.0",
+    "wavesurfer.js": "^7.9.5"
   },
   "hotHook": {
     "boundaries": [

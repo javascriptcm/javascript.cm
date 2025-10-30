@@ -6,6 +6,7 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Article from '#models/article'
 import { DbRememberMeTokensProvider } from '@adonisjs/auth/session'
+import { Role } from '#enums/role'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -38,10 +39,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare twitterId: string | null
 
   @column()
-  declare isAdmin: boolean
-
-  @column()
-  declare isSponsor: boolean
+  declare role: Role
 
   @column.dateTime()
   declare emailVerifiedAt: DateTime | null
@@ -70,8 +68,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
       name: this.name,
       email: this.email,
       avatar: this.avatar,
-      isAdmin: this.isAdmin,
-      isSponsor: this.isSponsor,
+      role: this.role,
     }
   }
 }

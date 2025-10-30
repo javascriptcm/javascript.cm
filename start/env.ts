@@ -32,11 +32,18 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   DB_HOST: Env.schema.string({ format: 'host' }),
   DB_PORT: Env.schema.number(),
-  DB_USER: Env.schema.string(),
+  DB_USERNAME: Env.schema.string(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
 
   GITHUB_CLIENT_ID: Env.schema.string(),
   GITHUB_CLIENT_SECRET: Env.schema.string(),
   GITHUB_CALLBACK_URL: Env.schema.string(),
+
+  MINIO_ENDPOINT: Env.schema.string(),
+  MINIO_PORT: Env.schema.number(),
+  MINIO_ROOT_USER: Env.schema.string(),
+  MINIO_ROOT_PASSWORD: Env.schema.string(),
+  MINIO_PUBLIC_URL: Env.schema.string(),
+  MINIO_DEFAULT_BUCKETS: Env.schema.string(),
 })

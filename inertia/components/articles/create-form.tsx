@@ -1,7 +1,9 @@
-import { FormEvent, useState, Suspense, lazy } from 'react'
-import { useForm } from '@inertiajs/react'
+import { FormEvent, Suspense, lazy } from 'react'
 import { Switch } from '@headlessui/react'
 import SlideOver from '../slide-over'
+import TagInput from './tag-input'
+import { useCreateArticleForm } from '../../hooks/useCreateArticleForm'
+import { ArticleStatus } from '#enums/article_status'
 
 const MDEditor = lazy(() => import('@uiw/react-md-editor'))
 
@@ -11,23 +13,18 @@ interface CreateArticleFormProps {
 }
 
 export default function CreateArticleForm({ isOpen, onClose }: CreateArticleFormProps) {
-  const [isDraft, setIsDraft] = useState(true)
-  const { data, setData, post, processing, errors } = useForm({
-    title: '',
-    canonicalUrl: '',
-    content: '',
-    excerpt: '',
-    tags: [],
-    language: 'fr',
-    coverImage: null as File | null,
-  })
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    post('/articles', {
-      onSuccess: () => onClose(),
-    })
-  }
+  const {
+    data,
+    setData,
+    processing,
+    errors,
+    isDraft,
+    fileInputRef,
+    coverPreview,
+    handleCoverChange,
+    handleSwitchChange,
+    handleSubmit,
+  } = useCreateArticleForm(onClose)
 
   return (
     <SlideOver isOpen={isOpen} onClose={onClose} title="Rédiger un article">
@@ -55,8 +52,41 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2">
+          <div
+            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6 bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {coverPreview ? (
+              <img src={coverPreview} alt="cover" className="h-40 object-cover rounded mb-2" />
+            ) : (
+              <>
+                <svg
+                  className="h-16 w-16 text-gray-400 mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12m-4 4h-4a1 1 0 01-1-1v-4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1z"
+                  />
+                </svg>
+                <span className="text-gray-600 text-lg">Ajouter une photo de couverture</span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleCoverChange}
+            />
+          </div>
+
+          <div className="flex gap-6">
+            <div className="grow flex flex-col justify-between">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                 Titre<span className="text-red-500">*</span>
               </label>
@@ -71,7 +101,7 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
               {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
             </div>
 
-            <div>
+            <div className="flex flex-col justify-between">
               <label htmlFor="language" className="block text-sm font-medium text-gray-700">
                 Langue<span className="text-red-500">*</span>
               </label>
@@ -79,7 +109,7 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
                 <button
                   type="button"
                   onClick={() => setData('language', 'en')}
-                  className={`px-3 py-1 rounded-md ${
+                  className={`px-3 py-2 rounded-md ${
                     data.language === 'en'
                       ? 'bg-gray-900 text-white'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
@@ -90,7 +120,7 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
                 <button
                   type="button"
                   onClick={() => setData('language', 'fr')}
-                  className={`px-3 py-1 rounded-md ${
+                  className={`px-3 py-2 rounded-md ${
                     data.language === 'fr'
                       ? 'bg-gray-900 text-white'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
@@ -128,6 +158,25 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="canonicalUrl" className="block text-sm font-medium text-gray-700">
+                URL canonique
+              </label>
+              <input
+                type="text"
+                id="canonicalUrl"
+                value={data.canonicalUrl}
+                onChange={(e) => setData('canonicalUrl', e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Tags</label>
+              <TagInput value={data.tags} onChange={(tags: string[]) => setData('tags', tags)} />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700">
               Contenu<span className="text-red-500">*</span>
@@ -158,13 +207,13 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
               <div className="flex items-center">
                 <Switch
                   checked={!isDraft}
-                  onChange={() => setIsDraft(!isDraft)}
-                  className={`${
+                  onChange={handleSwitchChange}
+                  className={`$${
                     !isDraft ? 'bg-indigo-600' : 'bg-gray-200'
                   } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
                 >
                   <span
-                    className={`${
+                    className={`$${
                       !isDraft ? 'translate-x-6' : 'translate-x-1'
                     } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                   />
@@ -188,7 +237,8 @@ export default function CreateArticleForm({ isOpen, onClose }: CreateArticleForm
                 disabled={processing}
                 className="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                {isDraft ? 'Sauvegarder comme brouillon' : 'Publier'}
+                {/* {processing ? <Spinner /> : null}{' '} */}
+                {data.status === ArticleStatus.DRAFT ? 'Sauvegarder comme brouillon' : 'Publier'}
               </button>
             </div>
           </div>

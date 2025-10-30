@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react'
 import { FormEvent } from 'react'
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
+import { ARTICLE_STATUS_LIST, ArticleStatus } from '../../../enums/article_status'
 
 export default function ArticleCreate() {
   const { data, setData, post, processing, errors } = useForm({
@@ -9,7 +10,7 @@ export default function ArticleCreate() {
     content: '',
     excerpt: '',
     tags: [],
-    published: false,
+    status: ArticleStatus.DRAFT,
   })
 
   function handleSubmit(e: FormEvent) {
@@ -67,17 +68,21 @@ export default function ArticleCreate() {
               {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
             </div>
 
-            <div className="flex items-center">
-              <input
-                id="published"
-                type="checkbox"
-                checked={data.published}
-                onChange={(e) => setData('published', e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label htmlFor="published" className="ml-2 block text-sm text-gray-900">
-                Publish immediately
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                Statut
               </label>
+              <select
+                id="status"
+                value={data.status}
+                onChange={(e) => setData('status', e.target.value as ArticleStatus)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              >
+                {ARTICLE_STATUS_LIST.map((status) => (
+                  <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}</option>
+                ))}
+              </select>
+              {errors.status && <p className="mt-1 text-sm text-red-600">{errors.status}</p>}
             </div>
 
             <div className="flex justify-end">

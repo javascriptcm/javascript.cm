@@ -1,13 +1,14 @@
-import { HttpContext } from '@adonisjs/core/http'
-import User from '#models/user'
+import { ArticleStatus } from '#enums/article_status'
 import Article from '#models/article'
+import User from '#models/user'
+import { HttpContext } from '@adonisjs/core/http'
 
 export default class ProfileController {
   async show({ params, inertia }: HttpContext) {
     const user = await User.findByOrFail('username', params.username.replace('@', ''))
     const articles = await Article.query()
       .where('author_id', user.id)
-      .where('is_published', true)
+      .where('status', ArticleStatus.PUBLISHED)
       .orderBy('created_at', 'desc')
       .preload('author')
 

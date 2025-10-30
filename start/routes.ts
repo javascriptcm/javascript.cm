@@ -7,14 +7,17 @@
 |
 */
 
-import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import router from '@adonisjs/core/services/router'
+const UploadController = () => import('#controllers/api/upload_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
 const GithubController = () => import('#controllers/auth/github_controller')
 const RegisterController = () => import('#controllers/auth/register_controller')
 const ArticlesController = () => import('#controllers/articles_controller')
 const ProfileController = () => import('#controllers/profile_controller')
 const HomeController = () => import('#controllers/home_controller')
+const MessagesController = () => import('#controllers/messages_controller')
+const DiscussionsController = () => import('#controllers/discussions_controller')
 
 // Guest routes (login/register)
 router
@@ -53,16 +56,70 @@ router.get('/:username', [ProfileController, 'show']).where('username', '@.*').a
 // Dashboard routes
 router
   .group(() => {
-    router
-      .get('dashboard', async ({ inertia }) => {
-        return inertia.render('dashboard/index', {
-          stats: {
-            articles: 0,
-            discussions: 0,
-            questions: 0,
-          },
-        })
-      })
-      .as('dashboard')
+    router.get('dashboard', [ArticlesController, 'dashboard']).as('dashboard')
+    router.get('dashboard/articles', [ArticlesController, 'articles']).as('dashboard.articles')
+    router.get('dashboard/articles/:slug/edit', [ArticlesController, 'edit']).as('dashboard.articles.edit')
+    router.put('dashboard/articles/:slug', [ArticlesController, 'update']).as('dashboard.articles.update')
   })
   .middleware(middleware.auth())
+
+router.post('api/upload/presign', [UploadController, 'presign']).as('api.upload.presign')
+router
+  .get('api/upload/presign-view', [UploadController, 'presignView'])
+  .as('api.upload.presignView')
+
+// Messages routes
+router
+  .post('messages', [MessagesController, 'store'])
+  .as('messages.store')
+  .middleware(middleware.auth())
+router
+  .put('messages/:id', [MessagesController, 'update'])
+  .as('messages.update')
+  .middleware(middleware.auth())
+router
+  .delete('messages/:id', [MessagesController, 'destroy'])
+  .as('messages.destroy')
+  .middleware(middleware.auth())
+router
+  .get('messages/:id/history', [MessagesController, 'history'])
+  .as('messages.history')
+  .middleware(middleware.auth())
+
+// Discussions routes
+router
+  .get('discussions', [DiscussionsController, 'index'])
+  .as('discussions.index')
+  .middleware(middleware.auth())
+router
+  .get('discussions/create', [DiscussionsController, 'create'])
+  .as('discussions.create')
+  .middleware(middleware.auth())
+router
+  .post('discussions', [DiscussionsController, 'store'])
+  .as('discussions.store')
+  .middleware(middleware.auth())
+router
+  .get('discussions/:id', [DiscussionsController, 'show'])
+  .as('discussions.show')
+  .middleware(middleware.auth())
+
+router
+  .post('discussions/:id/ban', [DiscussionsController, 'ban'])
+  .as('discussions.ban')
+  .middleware(middleware.admin())
+
+router
+  .delete('discussions/:id', [DiscussionsController, 'destroy'])
+  .as('discussions.destroy')
+  .middleware(middleware.admin())
+
+// Admin routes for articles
+router
+  .group(() => {
+    router.get('admin/articles', [ArticlesController, 'adminArticles']).as('admin.articles')
+    router.post('admin/articles/:slug/unpublish', [ArticlesController, 'unpublish']).as('admin.articles.unpublish')
+    router.post('admin/articles/:slug/ban', [ArticlesController, 'ban']).as('admin.articles.ban')
+    router.post('admin/articles/:slug/unban', [ArticlesController, 'unban']).as('admin.articles.unban')
+  })
+  .middleware(middleware.admin())

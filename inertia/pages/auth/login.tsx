@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react'
 import { router } from '@inertiajs/react'
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
+import { demoUsers } from '../../../mock-data/users'
 
 interface PageProps {
   errors: {
@@ -38,6 +39,32 @@ export default function Login() {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Sign in to your account
             </h2>
+          </div>
+
+          {/* Demo Buttons */}
+          <div className="flex gap-2 justify-center mb-2">
+            <button
+              type="button"
+              className="px-3 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-sm"
+              onClick={() => setData({
+                ...data,
+                email: demoUsers[0].email,
+                password: demoUsers[0].password,
+              })}
+            >
+              Demo Admin
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 text-sm"
+              onClick={() => setData({
+                ...data,
+                email: demoUsers[1].email,
+                password: demoUsers[1].password,
+              })}
+            >
+              Demo Member
+            </button>
           </div>
 
           {/* Flash Messages */}
@@ -83,7 +110,7 @@ export default function Login() {
 
           {/* Social Login */}
           <div className="space-y-3">
-            <Link
+            <a
               href="/auth/github"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
@@ -95,7 +122,7 @@ export default function Login() {
                 />
               </svg>
               Continue with GitHub
-            </Link>
+            </a>
           </div>
 
           <div className="relative">

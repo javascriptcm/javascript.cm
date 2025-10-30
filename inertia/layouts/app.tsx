@@ -1,5 +1,5 @@
-import { PropsWithChildren } from 'react'
 import { usePage } from '@inertiajs/react'
+import { PropsWithChildren } from 'react'
 
 export default function AppLayout({ children }: PropsWithChildren) {
   const { user } = usePage().props

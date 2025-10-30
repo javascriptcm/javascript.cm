@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
 import { getDirname } from '@adonisjs/core/helpers'
 import inertia from '@adonisjs/inertia/client'
-import react from '@vitejs/plugin-react'
 import adonisjs from '@adonisjs/vite/client'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
@@ -18,6 +18,16 @@ export default defineConfig({
   resolve: {
     alias: {
       '~/': `${getDirname(import.meta.url)}/inertia/`,
+    },
+  },
+
+  server: {
+    proxy: {
+      '/socket.io': {
+        target: 'http://localhost:3333',
+        ws: true,
+        // changeOrigin: true,
+      },
     },
   },
 })
