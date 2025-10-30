@@ -51,12 +51,12 @@ export default class ArticlesController {
   }
 
   async dashboard({ inertia, auth }: HttpContext) {
-    // Chaque utilisateur ne voit que ses propres statistiques
-    const stats = await ArticleStatsService.getStats(auth.user!.id)
+    const isAdmin = auth.user!.role === Role.ADMIN
+    const stats = await ArticleStatsService.getStats(auth.user!.id, isAdmin)
     return inertia.render('dashboard/index', {
       publishedArticles: stats.published,
       draftArticles: stats.drafts,
-      waitingArticles: stats.waiting,
+      bannedArticles: stats.banned,
       discussions: 0,
       questions: 0,
     })
@@ -65,14 +65,41 @@ export default class ArticlesController {
   async articles({ inertia, request, auth }: HttpContext) {
     const page = request.input('page', 1)
     const status = request.input('status', null)
+    const isAdmin = auth.user!.role === Role.ADMIN
 
-    const query = Article.query()
-      .preload('author')
-      .where('author_id', auth.user!.id)
-      .orderBy('created_at', 'desc')
+    let query = Article.query().preload('author').orderBy('created_at', 'desc')
 
-    if (status && Object.values(ArticleStatus).includes(status as ArticleStatus)) {
-      query.where('status', status as ArticleStatus)
+    // Logique différente selon le rôle
+    if (isAdmin) {
+      // Admin : voir tous les articles publiés/banned + ses propres brouillons
+      if (status && Object.values(ArticleStatus).includes(status as ArticleStatus)) {
+        if (status === ArticleStatus.PUBLISHED) {
+          // Voir tous les articles publiés (de tous les auteurs)
+          query.where('status', ArticleStatus.PUBLISHED)
+        } else if (status === ArticleStatus.BANNED) {
+          // Voir tous les articles banned (de tous les auteurs)
+          query.where('status', ArticleStatus.BANNED)
+        } else {
+          // Voir uniquement ses propres brouillons
+          query.where('status', status as ArticleStatus).where('author_id', auth.user!.id)
+        }
+      } else {
+        // Par défaut : tous les publiés + ses brouillons
+        query.where((builder) => {
+          builder
+            .where('status', ArticleStatus.PUBLISHED)
+            .orWhere((subBuilder) => {
+              subBuilder.where('author_id', auth.user!.id).where('status', ArticleStatus.DRAFT)
+            })
+        })
+      }
+    } else {
+      // Membre : voir uniquement ses propres articles
+      query.where('author_id', auth.user!.id)
+
+      if (status && Object.values(ArticleStatus).includes(status as ArticleStatus)) {
+        query.where('status', status as ArticleStatus)
+      }
     }
 
     const articles = await query.paginate(page, 10)
@@ -80,6 +107,7 @@ export default class ArticlesController {
     return inertia.render('dashboard/articles', {
       articles: articles.toJSON(),
       currentStatus: status,
+      isAdmin,
     })
   }
 
@@ -182,6 +210,43 @@ export default class ArticlesController {
     await article.save()
 
     session.flash('success', 'Article dépublié avec succès')
+    return response.redirect().back()
+  }
+
+  /**
+   * Bannir un article (admin seulement)
+   */
+  async ban({ params, request, response, session }: HttpContext) {
+    const article = await Article.query().where('slug', params.slug).firstOrFail()
+    const banReason = request.input('ban_reason')
+
+    article.status = ArticleStatus.BANNED
+    article.banReason = banReason
+    article.publishedAt = null
+    await article.save()
+
+    session.flash('success', 'Article banni avec succès')
+    return response.redirect().back()
+  }
+
+  /**
+   * Débannir un article (admin seulement)
+   */
+  async unban({ params, response, session }: HttpContext) {
+    const article = await Article.query().where('slug', params.slug).firstOrFail()
+
+    // Vérifier que l'article est banni
+    if (article.status !== ArticleStatus.BANNED) {
+      session.flash('error', 'Cet article n\'est pas banni')
+      return response.redirect().back()
+    }
+
+    // Débannir l'article (le repasser en brouillon)
+    article.status = ArticleStatus.DRAFT
+    article.banReason = null
+    await article.save()
+
+    session.flash('success', 'Article débanni avec succès')
     return response.redirect().back()
   }
 }

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react'
 import { useState } from 'react'
+import { useImageUrl } from '../../utils/image'
 
 interface ArticleCardProps {
   article: {
@@ -16,19 +17,19 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   const [imgError, setImgError] = useState(false)
-  const showFallback = imgError || !article.coverImage
-
-  console.log('article.coverImage', article.coverImage)
+  const displayImageUrl = useImageUrl(article.coverImage)
+  const showFallback = imgError || !displayImageUrl
 
   return (
-    <div className="bg-white rounded-xl shadow flex flex-col h-full cursor-pointer overflow-hidden border-2 border-gray-200 transition-all duration-300 hover:border-indigo-600">
-      <div
-        className={`h-48 flex items-center justify-center overflow-hidden ${showFallback ? 'bg-gray-100' : ''}`}
-        style={{ marginBottom: '0' }}
-      >
+    <Link href={`/articles/${article.slug}`} className="block">
+      <div className="bg-white rounded-xl shadow flex flex-col h-full cursor-pointer overflow-hidden border-2 border-gray-200 transition-all duration-300 hover:border-indigo-600">
+        <div
+          className={`h-48 flex items-center justify-center overflow-hidden ${showFallback ? 'bg-gray-100' : ''}`}
+          style={{ marginBottom: '0' }}
+        >
         {!showFallback ? (
           <img
-            src={article.coverImage!}
+            src={displayImageUrl!}
             alt={article.title}
             className="object-cover w-full h-full"
             onError={() => setImgError(true)}
@@ -57,12 +58,9 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             </span>
           ))}
         </div>
-        <Link
-          href={`/articles/${article.slug}`}
-          className="font-bold text-lg mb-2 hover:text-indigo-600 transition"
-        >
+        <h3 className="font-bold text-lg mb-2 hover:text-indigo-600 transition">
           {article.title}
-        </Link>
+        </h3>
         <p className="text-gray-600 text-sm flex-1">{article.excerpt}</p>
         <div className="flex items-center mt-4">
           {article.author.avatar ? (
@@ -80,5 +78,6 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         </div>
       </div>
     </div>
+    </Link>
   )
 }

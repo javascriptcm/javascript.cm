@@ -1,6 +1,6 @@
 export enum ArticleStatus {
   DRAFT = 'draft',
-  WAITING_APPROVAL = 'waiting_approval',
+  BANNED = 'banned',
   PUBLISHED = 'published',
 }
 

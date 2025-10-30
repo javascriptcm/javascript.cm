@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react'
 import DashboardLayout from '../../layouts/dashboard'
 import { useState } from 'react'
+import { useImageUrl } from '../../utils/image'
 
 interface Article {
   id: number
@@ -30,6 +31,7 @@ interface ArticlesProps {
     }
   }
   currentStatus: string | null
+  isAdmin: boolean
 }
 
 const statusConfig = {
@@ -41,13 +43,194 @@ const statusConfig = {
     label: 'Brouillon',
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   },
-  waiting_approval: {
-    label: 'En attente',
-    color: 'bg-blue-100 text-blue-800 border-blue-200',
+  banned: {
+    label: 'Banni',
+    color: 'bg-red-100 text-red-800 border-red-200',
   },
 }
 
-export default function DashboardArticles({ articles, currentStatus }: ArticlesProps) {
+// Composant pour afficher une ligne d'article avec l'image
+function ArticleRow({ article, getStatusBadge, formatDate, isAdmin, onUnpublish, onBan, onUnban }: {
+  article: Article
+  getStatusBadge: (status: string) => JSX.Element | null
+  formatDate: (date: string | null) => string
+  isAdmin: boolean
+  onUnpublish: (slug: string) => void
+  onBan: (slug: string) => void
+  onUnban: (slug: string) => void
+}) {
+  const displayImageUrl = useImageUrl(article.coverImage)
+
+  return (
+    <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+      <td className="px-6 py-4">
+        <div className="flex items-center">
+          {displayImageUrl && (
+            <div className="flex-shrink-0 h-16 w-24 mr-4">
+              <img
+                className="h-16 w-24 rounded object-cover"
+                src={displayImageUrl}
+                alt={article.title}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <Link
+              href={`/articles/${article.slug}`}
+              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+            >
+              {article.title}
+            </Link>
+            {article.excerpt && (
+              <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                {article.excerpt}
+              </p>
+            )}
+          </div>
+        </div>
+      </td>
+      {isAdmin && (
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+          <div>
+            <div className="font-medium">{article.author.name}</div>
+            <div className="text-xs text-gray-500">@{article.author.username}</div>
+          </div>
+        </td>
+      )}
+      <td className="px-6 py-4 whitespace-nowrap">
+        {getStatusBadge(article.status)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <div>
+          <div className="font-medium">
+            {article.status === 'published'
+              ? formatDate(article.publishedAt)
+              : formatDate(article.createdAt)}
+          </div>
+          <div className="text-xs text-gray-400">
+            {article.status === 'published' ? 'Publié' : 'Créé'}
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex justify-end gap-2">
+          <Link
+            href={`/dashboard/articles/${article.slug}/edit`}
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          >
+            <svg
+              className="h-4 w-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Éditer
+          </Link>
+          <Link
+            href={`/articles/${article.slug}`}
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          >
+            <svg
+              className="h-4 w-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+            Voir
+          </Link>
+          {isAdmin && article.status === 'published' && (
+            <>
+              <button
+                onClick={() => onUnpublish(article.slug)}
+                className="inline-flex items-center px-3 py-1.5 border border-orange-300 rounded-md text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 transition-colors"
+              >
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
+                </svg>
+                Dépublier
+              </button>
+              <button
+                onClick={() => onBan(article.slug)}
+                className="inline-flex items-center px-3 py-1.5 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors"
+              >
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
+                </svg>
+                Bannir
+              </button>
+            </>
+          )}
+          {isAdmin && article.status === 'banned' && (
+            <button
+              onClick={() => onUnban(article.slug)}
+              className="inline-flex items-center px-3 py-1.5 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50 transition-colors"
+            >
+              <svg
+                className="h-4 w-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Débannir
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+export default function DashboardArticles({ articles, currentStatus, isAdmin }: ArticlesProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleFilterChange = (status: string | null) => {
@@ -55,6 +238,34 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
       router.get('/dashboard/articles', { status }, { preserveState: true })
     } else {
       router.get('/dashboard/articles', {}, { preserveState: true })
+    }
+  }
+
+  const handleUnpublish = (slug: string) => {
+    if (confirm('Voulez-vous vraiment dépublier cet article ?')) {
+      router.post(`/admin/articles/${slug}/unpublish`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+      })
+    }
+  }
+
+  const handleBan = (slug: string) => {
+    const banReason = prompt('Raison du bannissement (optionnel):')
+    if (banReason !== null) {
+      router.post(`/admin/articles/${slug}/ban`, { ban_reason: banReason }, {
+        preserveState: true,
+        preserveScroll: true,
+      })
+    }
+  }
+
+  const handleUnban = (slug: string) => {
+    if (confirm('Voulez-vous vraiment débannir cet article ?')) {
+      router.post(`/admin/articles/${slug}/unban`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+      })
     }
   }
 
@@ -92,9 +303,13 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mes Articles</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isAdmin ? 'Gestion des Articles' : 'Mes Articles'}
+            </h1>
             <p className="mt-1 text-sm text-gray-500">
-              Gérez tous vos articles depuis un seul endroit
+              {isAdmin
+                ? 'Tous les articles publiés + vos brouillons personnels'
+                : 'Gérez tous vos articles depuis un seul endroit'}
             </p>
           </div>
           <Link
@@ -145,7 +360,7 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
                       : 'bg-green-50 text-green-700 hover:bg-green-100'
                   }`}
                 >
-                  Publiés
+                  {isAdmin ? 'Publiés (tous)' : 'Publiés'}
                 </button>
                 <button
                   onClick={() => handleFilterChange('draft')}
@@ -155,17 +370,17 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
                       : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                   }`}
                 >
-                  Brouillons
+                  {isAdmin ? 'Mes brouillons' : 'Brouillons'}
                 </button>
                 <button
-                  onClick={() => handleFilterChange('waiting_approval')}
+                  onClick={() => handleFilterChange('banned')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    currentStatus === 'waiting_approval'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    currentStatus === 'banned'
+                      ? 'bg-red-600 text-white shadow-md'
+                      : 'bg-red-50 text-red-700 hover:bg-red-100'
                   }`}
                 >
-                  En attente
+                  {isAdmin ? 'Bannis (tous)' : 'Bannis'}
                 </button>
               </div>
             </div>
@@ -243,6 +458,14 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
                     >
                       Article
                     </th>
+                    {isAdmin && (
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Auteur
+                      </th>
+                    )}
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -265,97 +488,16 @@ export default function DashboardArticles({ articles, currentStatus }: ArticlesP
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredArticles.map((article) => (
-                    <tr key={article.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          {article.coverImage && (
-                            <div className="flex-shrink-0 h-16 w-24 mr-4">
-                              <img
-                                className="h-16 w-24 rounded object-cover"
-                                src={article.coverImage}
-                                alt={article.title}
-                              />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <Link
-                              href={`/articles/${article.slug}`}
-                              className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
-                            >
-                              {article.title}
-                            </Link>
-                            {article.excerpt && (
-                              <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                                {article.excerpt}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(article.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div>
-                          <div className="font-medium">
-                            {article.status === 'published'
-                              ? formatDate(article.publishedAt)
-                              : formatDate(article.createdAt)}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {article.status === 'published' ? 'Publié' : 'Créé'}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-2">
-                          <Link
-                            href={`/dashboard/articles/${article.slug}/edit`}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                          >
-                            <svg
-                              className="h-4 w-4 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                            Éditer
-                          </Link>
-                          <Link
-                            href={`/articles/${article.slug}`}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                          >
-                            <svg
-                              className="h-4 w-4 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                              />
-                            </svg>
-                            Voir
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
+                    <ArticleRow
+                      key={article.id}
+                      article={article}
+                      getStatusBadge={getStatusBadge}
+                      formatDate={formatDate}
+                      isAdmin={isAdmin}
+                      onUnpublish={handleUnpublish}
+                      onBan={handleBan}
+                      onUnban={handleUnban}
+                    />
                   ))}
                 </tbody>
               </table>

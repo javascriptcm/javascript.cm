@@ -4,7 +4,7 @@ import DashboardLayout from '../../layouts/dashboard'
 interface DashboardProps {
   publishedArticles: number
   draftArticles: number
-  waitingArticles: number
+  bannedArticles: number
   discussions: number
   questions: number
 }
@@ -33,7 +33,7 @@ function Badge({ color, children, href }: { color: string; children: React.React
   )
 }
 
-export default function Dashboard({ publishedArticles, draftArticles, waitingArticles, discussions, questions , ...props}: DashboardProps) {
+export default function Dashboard({ publishedArticles, draftArticles, bannedArticles, discussions, questions , ...props}: DashboardProps) {
   return (
     <DashboardLayout>
       <Head title="Dashboard - JavaScript Cameroun" />
@@ -50,8 +50,8 @@ export default function Dashboard({ publishedArticles, draftArticles, waitingArt
               <Badge color="bg-yellow-500 text-yellow-800" href="/dashboard/articles?status=draft">
                 Brouillons ({draftArticles})
               </Badge>
-              <Badge color="bg-blue-500 text-blue-800" href="/dashboard/articles?status=waiting_approval">
-                En attente ({waitingArticles})
+              <Badge color="bg-red-600 text-red-800" href="/dashboard/articles?status=banned">
+                Bannis ({bannedArticles})
               </Badge>
             </div>
           </div>

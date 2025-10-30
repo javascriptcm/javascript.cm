@@ -119,5 +119,7 @@ router
   .group(() => {
     router.get('admin/articles', [ArticlesController, 'adminArticles']).as('admin.articles')
     router.post('admin/articles/:slug/unpublish', [ArticlesController, 'unpublish']).as('admin.articles.unpublish')
+    router.post('admin/articles/:slug/ban', [ArticlesController, 'ban']).as('admin.articles.ban')
+    router.post('admin/articles/:slug/unban', [ArticlesController, 'unban']).as('admin.articles.unban')
   })
   .middleware(middleware.admin())

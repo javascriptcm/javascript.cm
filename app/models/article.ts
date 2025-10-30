@@ -51,6 +51,9 @@ export default class Article extends BaseModel {
   })
   declare tags: string[]
 
+  @column()
+  declare banReason: string | null
+
   // Generate slug before saving
   public static generateSlug(title: string) {
     return string.slug(title)
