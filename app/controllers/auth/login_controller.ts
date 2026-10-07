@@ -23,7 +23,10 @@ export default class LoginController {
     }
 
     if (user.isBanned) {
-      session.flash('error', 'Ce compte a été suspendu. Contactez l’équipe si vous pensez à une erreur.')
+      session.flash(
+        'error',
+        'Ce compte a été suspendu. Contactez l’équipe si vous pensez à une erreur.'
+      )
       return response.redirect().back()
     }
 

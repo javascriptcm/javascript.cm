@@ -26,7 +26,13 @@ const CHOICES = [
 /**
  * "Écrire" chooser: what do you want to publish?
  */
-export default function CreateContentModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function CreateContentModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-ink/45" aria-hidden="true" />
@@ -38,7 +44,12 @@ export default function CreateContentModal({ isOpen, onClose }: { isOpen: boolea
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-4">
               <DialogTitle className="label text-ink">Publier sur javascript.cm</DialogTitle>
-              <button type="button" onClick={onClose} aria-label="Fermer" className="grid size-9 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink">
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fermer"
+                className="grid size-9 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -52,10 +63,17 @@ export default function CreateContentModal({ isOpen, onClose }: { isOpen: boolea
                   >
                     <span className="label pt-1.5 group-hover:text-js-ink">{choice.code}</span>
                     <span>
-                      <span className="block text-[26px] leading-tight font-bold tracking-[-0.03em]">{choice.title}</span>
-                      <span className="mt-1.5 block max-w-md text-[15px] text-ink-2 group-hover:text-js-ink/80">{choice.text}</span>
+                      <span className="block text-[26px] leading-tight font-bold tracking-[-0.03em]">
+                        {choice.title}
+                      </span>
+                      <span className="mt-1.5 block max-w-md text-[15px] text-ink-2 group-hover:text-js-ink/80">
+                        {choice.text}
+                      </span>
                     </span>
-                    <span aria-hidden="true" className="pt-1 text-[22px] transition-transform duration-300 ease-out-expo group-hover:translate-x-1">
+                    <span
+                      aria-hidden="true"
+                      className="pt-1 text-[22px] transition-transform duration-300 ease-out-expo group-hover:translate-x-1"
+                    >
                       →
                     </span>
                   </Link>

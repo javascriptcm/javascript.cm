@@ -121,6 +121,8 @@
   h4 {
     text-wrap: balance;
     letter-spacing: -0.02em;
+    /* Long tokens (ERR_REQUIRE_ESM, URLs) must never push the layout sideways. */
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -265,6 +267,7 @@
   font-size: 17.5px;
   line-height: 1.7;
   max-width: 68ch;
+  overflow-wrap: anywhere;
 }
 
 .prose-jscm :where(h2, h3, h4) {

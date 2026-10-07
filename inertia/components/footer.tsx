@@ -9,6 +9,8 @@ const COLUMNS = [
       { href: '/forum', label: 'Forum' },
       { href: '/discussions', label: 'Discussions' },
       { href: '/membres', label: 'Membres' },
+      { href: '/a-propos', label: 'À propos' },
+      { href: '/code-de-conduite', label: 'Code de conduite' },
     ],
   },
   {
@@ -49,7 +51,10 @@ export default function Footer() {
               Rejoindre la communauté →
             </Link>
           </div>
-          <nav aria-label="Pied de page" className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7">
+          <nav
+            aria-label="Pied de page"
+            className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7"
+          >
             {COLUMNS.map((column) => (
               <div key={column.title}>
                 <p className="label text-paper/60 dark:text-muted">{column.title}</p>
@@ -57,9 +62,16 @@ export default function Footer() {
                   {column.links.map((link) => (
                     <li key={link.href}>
                       {'external' in link && link.external ? (
-                        <a href={link.href} className="link-draw text-[15.5px]" target={link.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">
+                        <a
+                          href={link.href}
+                          className="link-draw text-[15.5px]"
+                          target={link.href.startsWith('http') ? '_blank' : undefined}
+                          rel="noopener noreferrer"
+                        >
                           {link.label}
-                          {link.href.startsWith('http') && <span className="ml-1 opacity-50">↗</span>}
+                          {link.href.startsWith('http') && (
+                            <span className="ml-1 opacity-50">↗</span>
+                          )}
                         </a>
                       ) : (
                         <Link href={link.href} className="link-draw text-[15.5px]">
@@ -76,7 +88,7 @@ export default function Footer() {
 
         <p
           aria-hidden="true"
-          className="mt-20 -mb-[0.12em] text-[clamp(3.5rem,15.5vw,13.5rem)] leading-[0.8] font-extrabold tracking-[-0.065em] select-none"
+          className="mt-20 -mb-[0.12em] text-[clamp(3.2rem,14.2vw,12.5rem)] leading-[0.8] font-extrabold tracking-[-0.065em] select-none"
         >
           javascript<span className="text-js dark:text-muted">.cm</span>
         </p>
@@ -84,15 +96,27 @@ export default function Footer() {
         <div className="mt-8 flex flex-col gap-4 border-t border-paper/20 pt-6 sm:flex-row sm:items-center sm:justify-between dark:border-line">
           <div className="flex items-center gap-3">
             <LogoMark className="size-7" />
-            <p className="label text-paper/60 dark:text-muted">© {year} JavaScript Cameroun · Douala — Yaoundé — Buea</p>
+            <p className="label text-paper/60 dark:text-muted">
+              © {year} JavaScript Cameroun · Douala — Yaoundé — Buea
+            </p>
           </div>
           <p className="label text-paper/60 dark:text-muted">
-            <a href="https://github.com/javascriptcm/javascript.cm" className="link-draw" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/javascriptcm/javascript.cm"
+              className="link-draw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Code source ouvert ↗
             </a>
             <span className="mx-2">·</span>
             Inspiré par{' '}
-            <a href="https://laravel.cm" className="link-draw" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://laravel.cm"
+              className="link-draw"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Laravel Cameroun ↗
             </a>
           </p>

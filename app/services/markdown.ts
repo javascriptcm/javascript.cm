@@ -98,7 +98,7 @@ export function plainExcerpt(source: string, length = 180): string {
     .replace(/`([^`]*)`/g, '$1')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^#{1,6}\s+.*$/gm, ' ')
     .replace(/[*_~>#-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()

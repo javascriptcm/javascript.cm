@@ -20,18 +20,24 @@ export default function OpenSourceSection() {
   }
 
   return (
-    <section aria-labelledby="open-source" className="mt-24 border-y border-ink bg-js text-js-ink sm:mt-32">
-      <div className="shell grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:items-end">
+    <section
+      aria-labelledby="open-source"
+      className="mt-24 border-y border-ink bg-js text-js-ink sm:mt-32"
+    >
+      <div className="shell grid grid-cols-1 gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:items-end">
         <div className="lg:col-span-7">
           <p className="label text-js-ink/70">[04] — Open source</p>
-          <h2 id="open-source" className="mt-5 text-[clamp(2.6rem,7vw,6rem)] leading-[0.9] font-extrabold tracking-[-0.05em]">
+          <h2
+            id="open-source"
+            className="mt-5 text-[clamp(2.6rem,7vw,6rem)] leading-[0.9] font-extrabold tracking-[-0.05em]"
+          >
             Ce site est écrit par la communauté.
           </h2>
         </div>
         <div className="lg:col-span-5">
           <p className="text-[17.5px] leading-relaxed">
-            AdonisJS, React, Inertia, TypeScript. Corrigez un bug, proposez une fonctionnalité, faites votre première
-            contribution open source sur un projet que vous utilisez.
+            AdonisJS, React, Inertia, TypeScript. Corrigez un bug, proposez une fonctionnalité,
+            faites votre première contribution open source sur un projet que vous utilisez.
           </p>
           <div className="mt-6 flex items-stretch rounded-sm border border-js-ink bg-js-ink text-js">
             <code className="min-w-0 flex-1 overflow-x-auto px-4 py-3.5 font-mono text-[13px] whitespace-nowrap">

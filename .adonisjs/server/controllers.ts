@@ -4,15 +4,30 @@
  */
 
 export const controllers = {
+  admin: {
+    Channels: () => import('#controllers/admin/channels_controller'),
+    Members: () => import('#controllers/admin/members_controller'),
+    Overview: () => import('#controllers/admin/overview_controller'),
+    Tags: () => import('#controllers/admin/tags_controller'),
+  },
+  ArticleActions: () => import('#controllers/article_actions_controller'),
+  ArticleComments: () => import('#controllers/article_comments_controller'),
   Articles: () => import('#controllers/articles_controller'),
   auth: {
     Github: () => import('#controllers/auth/github_controller'),
     Login: () => import('#controllers/auth/login_controller'),
     Register: () => import('#controllers/auth/register_controller'),
   },
+  Dashboard: () => import('#controllers/dashboard_controller'),
+  DiscussionActions: () => import('#controllers/discussion_actions_controller'),
+  Discussions: () => import('#controllers/discussions_controller'),
   Home: () => import('#controllers/home_controller'),
   Markdown: () => import('#controllers/markdown_controller'),
+  Members: () => import('#controllers/members_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Replies: () => import('#controllers/replies_controller'),
   Seo: () => import('#controllers/seo_controller'),
+  Settings: () => import('#controllers/settings_controller'),
+  ThreadActions: () => import('#controllers/thread_actions_controller'),
+  Threads: () => import('#controllers/threads_controller'),
 }

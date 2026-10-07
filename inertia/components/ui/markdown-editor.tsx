@@ -1,5 +1,15 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
-import { Bold, Code, Heading2, Italic, Link2, List, ListOrdered, Quote, SquareCode } from 'lucide-react'
+import {
+  Bold,
+  Code,
+  Heading2,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Quote,
+  SquareCode,
+} from 'lucide-react'
 import { postJson } from '~/lib/http'
 import { cn } from '~/lib/format'
 import { Prose } from '~/components/ui/prose'
@@ -13,14 +23,45 @@ type Action = {
 
 const ACTIONS: Action[] = [
   { label: 'Intertitre', icon: Heading2, apply: (s) => ({ text: `\n## ${s || 'Intertitre'}\n` }) },
-  { label: 'Gras', shortcut: 'b', icon: Bold, apply: (s) => ({ text: `**${s || 'texte'}**`, select: [2, 2 + (s || 'texte').length] }) },
-  { label: 'Italique', shortcut: 'i', icon: Italic, apply: (s) => ({ text: `_${s || 'texte'}_`, select: [1, 1 + (s || 'texte').length] }) },
-  { label: 'Lien', shortcut: 'k', icon: Link2, apply: (s) => ({ text: `[${s || 'titre'}](https://)`, select: [(s || 'titre').length + 3, (s || 'titre').length + 11] }) },
-  { label: 'Code', shortcut: 'e', icon: Code, apply: (s) => ({ text: `\`${s || 'code'}\``, select: [1, 1 + (s || 'code').length] }) },
-  { label: 'Bloc de code', icon: SquareCode, apply: (s) => ({ text: `\n\`\`\`js\n${s || '// votre code'}\n\`\`\`\n` }) },
+  {
+    label: 'Gras',
+    shortcut: 'b',
+    icon: Bold,
+    apply: (s) => ({ text: `**${s || 'texte'}**`, select: [2, 2 + (s || 'texte').length] }),
+  },
+  {
+    label: 'Italique',
+    shortcut: 'i',
+    icon: Italic,
+    apply: (s) => ({ text: `_${s || 'texte'}_`, select: [1, 1 + (s || 'texte').length] }),
+  },
+  {
+    label: 'Lien',
+    shortcut: 'k',
+    icon: Link2,
+    apply: (s) => ({
+      text: `[${s || 'titre'}](https://)`,
+      select: [(s || 'titre').length + 3, (s || 'titre').length + 11],
+    }),
+  },
+  {
+    label: 'Code',
+    shortcut: 'e',
+    icon: Code,
+    apply: (s) => ({ text: `\`${s || 'code'}\``, select: [1, 1 + (s || 'code').length] }),
+  },
+  {
+    label: 'Bloc de code',
+    icon: SquareCode,
+    apply: (s) => ({ text: `\n\`\`\`js\n${s || '// votre code'}\n\`\`\`\n` }),
+  },
   { label: 'Citation', icon: Quote, apply: (s) => ({ text: `\n> ${s || 'citation'}\n` }) },
   { label: 'Liste', icon: List, apply: (s) => ({ text: `\n- ${s || 'élément'}\n` }) },
-  { label: 'Liste numérotée', icon: ListOrdered, apply: (s) => ({ text: `\n1. ${s || 'élément'}\n` }) },
+  {
+    label: 'Liste numérotée',
+    icon: ListOrdered,
+    apply: (s) => ({ text: `\n1. ${s || 'élément'}\n` }),
+  },
 ]
 
 /**
@@ -111,10 +152,22 @@ export function MarkdownEditor({
     >
       <div className="flex items-center justify-between gap-2 border-b border-line bg-paper-2/60">
         <div role="tablist" className="flex">
-          <button type="button" role="tab" aria-selected={tab === 'write'} className={tabClass(tab === 'write')} onClick={() => setTab('write')}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'write'}
+            className={tabClass(tab === 'write')}
+            onClick={() => setTab('write')}
+          >
             Écrire
           </button>
-          <button type="button" role="tab" aria-selected={tab === 'preview'} className={tabClass(tab === 'preview')} onClick={showPreview}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'preview'}
+            className={tabClass(tab === 'preview')}
+            onClick={showPreview}
+          >
             Aperçu
           </button>
         </div>
@@ -125,7 +178,11 @@ export function MarkdownEditor({
                 key={action.label}
                 type="button"
                 onClick={() => apply(action)}
-                title={action.shortcut ? `${action.label} (⌘${action.shortcut.toUpperCase()})` : action.label}
+                title={
+                  action.shortcut
+                    ? `${action.label} (⌘${action.shortcut.toUpperCase()})`
+                    : action.label
+                }
                 aria-label={action.label}
                 className="grid size-8 place-items-center rounded-xs text-muted transition-colors hover:bg-js hover:text-js-ink"
               >

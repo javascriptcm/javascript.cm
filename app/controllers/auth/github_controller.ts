@@ -54,7 +54,8 @@ export default class GithubController {
         avatarUrl: profile.avatarUrl,
         bio: profile.bio?.slice(0, 280) ?? null,
         location: profile.location?.slice(0, 100) ?? null,
-        websiteUrl: profile.blog && /^https?:\/\//.test(profile.blog) ? profile.blog.slice(0, 255) : null,
+        websiteUrl:
+          profile.blog && /^https?:\/\//.test(profile.blog) ? profile.blog.slice(0, 255) : null,
         twitterUsername: profile.twitterUsername,
         password: null,
         role: 'member',
@@ -74,7 +75,11 @@ export default class GithubController {
   }
 
   private async availableUsername(login: string) {
-    const base = login.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24) || 'membre'
+    const base =
+      login
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '')
+        .slice(0, 24) || 'membre'
     let candidate = RESERVED_USERNAMES.includes(base) ? `${base}-dev` : base
     while (await User.findBy('username', candidate)) {
       candidate = `${base}-${string.random(4).toLowerCase()}`

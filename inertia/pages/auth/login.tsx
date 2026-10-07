@@ -19,8 +19,12 @@ export default function Login({ redirect }: { redirect: string }) {
     <>
       <Seo title="Connexion" description="Connectez-vous à JavaScript Cameroun." noindex />
       <p className="label">Connexion</p>
-      <h1 className="mt-3 text-[clamp(2.3rem,5vw,3.2rem)] leading-[0.95] font-bold tracking-[-0.04em]">Bon retour parmi nous.</h1>
-      <p className="mt-3 text-[16px] text-ink-2">Reprenez là où vous en étiez : vos articles, vos questions, vos discussions.</p>
+      <h1 className="mt-3 text-[clamp(2.3rem,5vw,3.2rem)] leading-[0.95] font-bold tracking-[-0.04em]">
+        Bon retour parmi nous.
+      </h1>
+      <p className="mt-3 text-[16px] text-ink-2">
+        Reprenez là où vous en étiez : vos articles, vos questions, vos discussions.
+      </p>
 
       {features.github && (
         <>
@@ -33,7 +37,11 @@ export default function Login({ redirect }: { redirect: string }) {
         </>
       )}
 
-      <form onSubmit={submit} className={features.github ? 'grid gap-5' : 'mt-8 grid gap-5'} noValidate>
+      <form
+        onSubmit={submit}
+        className={features.github ? 'grid gap-5' : 'mt-8 grid gap-5'}
+        noValidate
+      >
         <Field label="E-mail ou nom d’utilisateur" htmlFor="login" error={form.errors.login}>
           <Input
             id="login"
@@ -74,7 +82,10 @@ export default function Login({ redirect }: { redirect: string }) {
 
       <p className="mt-8 border-t border-line pt-6 text-[15px] text-ink-2">
         Pas encore membre ?{' '}
-        <Link href="/register" className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js">
+        <Link
+          href="/register"
+          className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js"
+        >
           Créer un compte
         </Link>
       </p>

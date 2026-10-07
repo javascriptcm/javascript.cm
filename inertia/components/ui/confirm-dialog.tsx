@@ -12,6 +12,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = 'Supprimer',
+  kicker = 'Action irréversible',
   processing = false,
 }: {
   open: boolean
@@ -20,6 +21,8 @@ export function ConfirmDialog({
   title: ReactNode
   description?: ReactNode
   confirmLabel?: string
+  /** Small label above the title; pass null for reversible actions. */
+  kicker?: string | null
   processing?: boolean
 }) {
   return (
@@ -27,9 +30,13 @@ export function ConfirmDialog({
       <div className="fixed inset-0 bg-ink/40" aria-hidden="true" />
       <div className="fixed inset-0 grid place-items-center p-4">
         <DialogPanel className="w-full max-w-md rounded-sm border border-ink bg-card p-6 shadow-[6px_6px_0_var(--ink)]">
-          <p className="label text-danger">Action irréversible</p>
-          <DialogTitle className="mt-3 text-[22px] font-semibold leading-tight tracking-[-0.02em]">{title}</DialogTitle>
-          {description && <Description className="mt-2 text-[15px] text-ink-2">{description}</Description>}
+          {kicker && <p className="label text-danger">{kicker}</p>}
+          <DialogTitle className="mt-3 text-[22px] font-semibold leading-tight tracking-[-0.02em]">
+            {title}
+          </DialogTitle>
+          {description && (
+            <Description className="mt-2 text-[15px] text-ink-2">{description}</Description>
+          )}
           <div className="mt-6 flex justify-end gap-2">
             <Button variant="ghost" onClick={onClose}>
               Annuler

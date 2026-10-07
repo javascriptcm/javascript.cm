@@ -36,6 +36,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   // Rate limiting
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
 
+  // Seed fictional demo content (members, articles, threads) when "true"
+  SEED_DEMO: Env.schema.boolean.optional(),
+
   // GitHub OAuth (optional: the "Continue with GitHub" button is hidden when unset)
   GITHUB_CLIENT_ID: Env.schema.string.optional(),
   GITHUB_CLIENT_SECRET: Env.schema.string.optional(),

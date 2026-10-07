@@ -1,4 +1,10 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import {
+  forwardRef,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react'
 import { cn } from '~/lib/format'
 
 const control =
@@ -45,23 +51,24 @@ export function Field({
   )
 }
 
-export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }>(
-  function Input({ className, invalid, ...props }, ref) {
-    return (
-      <input
-        ref={ref}
-        aria-invalid={invalid || undefined}
-        className={cn(control, 'h-11 px-3.5', className)}
-        {...props}
-      />
-    )
-  }
-)
+export const Input = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }
+>(function InputComponent({ className, invalid, ...props }, ref) {
+  return (
+    <input
+      ref={ref}
+      aria-invalid={invalid || undefined}
+      className={cn(control, 'h-11 px-3.5', className)}
+      {...props}
+    />
+  )
+})
 
 export const Textarea = forwardRef<
   HTMLTextAreaElement,
   TextareaHTMLAttributes<HTMLTextAreaElement> & { invalid?: boolean }
->(function Textarea({ className, invalid, ...props }, ref) {
+>(function TextareaComponent({ className, invalid, ...props }, ref) {
   return (
     <textarea
       ref={ref}
@@ -75,12 +82,16 @@ export const Textarea = forwardRef<
 export const Select = forwardRef<
   HTMLSelectElement,
   SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean }
->(function Select({ className, invalid, children, ...props }, ref) {
+>(function SelectComponent({ className, invalid, children, ...props }, ref) {
   return (
     <select
       ref={ref}
       aria-invalid={invalid || undefined}
-      className={cn(control, 'h-11 appearance-none bg-[length:12px] bg-[right_14px_center] bg-no-repeat px-3.5 pr-10', className)}
+      className={cn(
+        control,
+        'h-11 appearance-none bg-[length:12px] bg-[right_14px_center] bg-no-repeat px-3.5 pr-10',
+        className
+      )}
       style={{
         backgroundImage:
           "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%2369655a' stroke-width='1.5'/%3E%3C/svg%3E\")",
@@ -99,7 +110,13 @@ export function Checkbox({
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { id: string; label: ReactNode }) {
   return (
-    <label htmlFor={id} className={cn('inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-ink-2', className)}>
+    <label
+      htmlFor={id}
+      className={cn(
+        'inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-ink-2',
+        className
+      )}
+    >
       <input
         id={id}
         type="checkbox"

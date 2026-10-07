@@ -37,7 +37,13 @@ export const usernameRule = () =>
 export const registerValidator = vine.create({
   name: vine.string().trim().minLength(2).maxLength(120),
   username: usernameRule().unique({ table: 'users', column: 'username' }),
-  email: vine.string().trim().toLowerCase().email().maxLength(254).unique({ table: 'users', column: 'email' }),
+  email: vine
+    .string()
+    .trim()
+    .toLowerCase()
+    .email()
+    .maxLength(254)
+    .unique({ table: 'users', column: 'email' }),
   password: vine.string().minLength(8).maxLength(128),
   passwordConfirmation: vine.string().sameAs('password'),
 })

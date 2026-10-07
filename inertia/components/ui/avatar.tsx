@@ -7,11 +7,11 @@ type AvatarUser = {
 }
 
 const sizes = {
-  xs: 'size-6 text-[10px]',
-  sm: 'size-8 text-[11.5px]',
-  md: 'size-10 text-[13px]',
-  lg: 'size-14 text-[17px]',
-  xl: 'size-24 text-[28px]',
+  'xs': 'size-6 text-[10px]',
+  'sm': 'size-8 text-[11.5px]',
+  'md': 'size-10 text-[13px]',
+  'lg': 'size-14 text-[17px]',
+  'xl': 'size-24 text-[28px]',
   '2xl': 'size-32 text-[38px]',
 }
 

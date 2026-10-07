@@ -20,9 +20,12 @@ type Props = {
 }
 
 function todayLabel() {
-  return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(
-    new Date()
-  )
+  return new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
 }
 
 export default function Home({ stats, articles, threads, discussions, members }: Props) {
@@ -66,8 +69,8 @@ export default function Home({ stats, articles, threads, discussions, members }:
 
             <div className="rise rise-3 flex flex-col justify-end lg:col-span-3">
               <p className="text-[18px] leading-relaxed text-ink-2">
-                La communauté des développeurs JavaScript du Cameroun. Des articles, un forum d’entraide et des
-                discussions — de Node.js à React, de TypeScript au mobile.
+                La communauté des développeurs JavaScript du Cameroun. Des articles, un forum
+                d’entraide et des discussions — de Node.js à React, de TypeScript au mobile.
               </p>
               <div className="mt-7 flex flex-col gap-2 sm:flex-row lg:flex-col">
                 {user ? (
@@ -141,7 +144,12 @@ export default function Home({ stats, articles, threads, discussions, members }:
             {threads.length ? (
               <ThreadList threads={threads} />
             ) : (
-              <EmptyState className="mt-6" code="FRM" title="Aucune question pour l’instant." description="Posez la première question du forum." />
+              <EmptyState
+                className="mt-6"
+                code="FRM"
+                title="Aucune question pour l’instant."
+                description="Posez la première question du forum."
+              />
             )}
           </div>
         </div>
@@ -160,7 +168,12 @@ export default function Home({ stats, articles, threads, discussions, members }:
             {discussions.length ? (
               <DiscussionList discussions={discussions} />
             ) : (
-              <EmptyState className="mt-6" code="DSC" title="Aucune discussion ouverte." description="Lancez le premier sujet." />
+              <EmptyState
+                className="mt-6"
+                code="DSC"
+                title="Aucune discussion ouverte."
+                description="Lancez le premier sujet."
+              />
             )}
           </div>
         </div>
@@ -172,14 +185,27 @@ export default function Home({ stats, articles, threads, discussions, members }:
             <ul className="mt-6 grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-4">
               {members.map((member) => (
                 <li key={member.id}>
-                  <Link href={`/@${member.username}`} className="group flex flex-col items-start gap-2" title={member.displayName}>
-                    <Avatar user={member} size="lg" className="transition-transform duration-300 ease-out-expo group-hover:-translate-y-1" />
-                    <span className="w-full truncate font-mono text-[11.5px] text-muted group-hover:text-ink">@{member.username}</span>
+                  <Link
+                    href={`/@${member.username}`}
+                    className="group flex flex-col items-start gap-2"
+                    title={member.displayName}
+                  >
+                    <Avatar
+                      user={member}
+                      size="lg"
+                      className="transition-transform duration-300 ease-out-expo group-hover:-translate-y-1"
+                    />
+                    <span className="w-full truncate font-mono text-[11.5px] text-muted group-hover:text-ink">
+                      @{member.username}
+                    </span>
                   </Link>
                 </li>
               ))}
             </ul>
-            <Link href="/membres" className="mt-6 inline-flex items-center gap-2 font-mono text-[13px] font-medium tracking-[0.06em] uppercase">
+            <Link
+              href="/membres"
+              className="mt-6 inline-flex items-center gap-2 font-mono text-[13px] font-medium tracking-[0.06em] uppercase"
+            >
               <span className="link-draw">L’annuaire des membres</span> →
             </Link>
           </div>

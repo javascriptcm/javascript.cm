@@ -35,7 +35,9 @@ export function ReplyItem({
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const form = useForm({ body: reply.body })
-  const canManage = Boolean(user && reply.author && (user.id === reply.author.id || user.isModerator))
+  const canManage = Boolean(
+    user && reply.author && (user.id === reply.author.id || user.isModerator)
+  )
   const isMine = Boolean(user && reply.author && user.id === reply.author.id)
 
   function save() {
@@ -54,7 +56,8 @@ export function ReplyItem({
   }
 
   function toggleLike() {
-    if (!user) return router.visit(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+    if (!user)
+      return router.visit(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
     router.post(`/replies/${reply.id}/like`, {}, { preserveScroll: true, preserveState: true })
   }
 
@@ -76,12 +79,17 @@ export function ReplyItem({
       <div className="min-w-0">
         <header className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[14px]">
           {reply.author && (
-            <Link href={`/@${reply.author.username}`} className="font-semibold text-ink hover:underline">
+            <Link
+              href={`/@${reply.author.username}`}
+              className="font-semibold text-ink hover:underline"
+            >
               {reply.author.displayName}
             </Link>
           )}
           {reply.author && opAuthorId === reply.author.id && (
-            <span className="label rounded-xs border border-line-2 px-1.5 py-0.5 text-[10px]">Auteur</span>
+            <span className="label rounded-xs border border-line-2 px-1.5 py-0.5 text-[10px]">
+              Auteur
+            </span>
           )}
           <span className="text-muted" aria-hidden="true">
             ·
@@ -110,7 +118,15 @@ export function ReplyItem({
 
         {editing ? (
           <div className="mt-4">
-            <MarkdownEditor id={`edit-reply-${reply.id}`} value={form.data.body} onChange={(v) => form.setData('body', v)} onSubmit={save} error={form.errors.body} compact rows={6} />
+            <MarkdownEditor
+              id={`edit-reply-${reply.id}`}
+              value={form.data.body}
+              onChange={(v) => form.setData('body', v)}
+              onSubmit={save}
+              error={form.errors.body}
+              compact
+              rows={6}
+            />
             <div className="mt-3 flex justify-end gap-2">
               <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
                 Annuler
@@ -130,10 +146,14 @@ export function ReplyItem({
             onClick={toggleLike}
             disabled={isMine}
             aria-pressed={reply.likedByMe}
-            title={isMine ? 'Vous ne pouvez pas aimer votre propre réponse' : 'Cette réponse m’a aidé'}
+            title={
+              isMine ? 'Vous ne pouvez pas aimer votre propre réponse' : 'Cette réponse m’a aidé'
+            }
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-sm border px-2.5 font-mono text-[12.5px] font-medium tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-              reply.likedByMe ? 'border-ink bg-js text-js-ink' : 'border-line-2 text-ink-2 hover:border-ink hover:text-ink'
+              reply.likedByMe
+                ? 'border-ink bg-js text-js-ink'
+                : 'border-line-2 text-ink-2 hover:border-ink hover:text-ink'
             )}
           >
             <Heart size={13} fill={reply.likedByMe ? 'currentColor' : 'none'} />

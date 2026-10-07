@@ -39,14 +39,24 @@ export function Pagination({ meta, className }: { meta: PaginationMeta; classNam
     'inline-grid h-10 min-w-10 place-items-center rounded-sm border px-3 font-mono text-[13px] font-medium transition-colors duration-150'
 
   return (
-    <nav aria-label="Pagination" className={cn('flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6', className)}>
+    <nav
+      aria-label="Pagination"
+      className={cn(
+        'flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6',
+        className
+      )}
+    >
       <p className="label">
         Page {meta.currentPage} / {meta.lastPage} · {meta.total} au total
       </p>
       <ul className="flex flex-wrap items-center gap-1.5">
         {meta.currentPage > 1 && (
           <li>
-            <Link href={pageHref(url, meta.currentPage - 1)} className={cn(cell, 'border-line-2 hover:border-ink hover:bg-ink hover:text-paper')} rel="prev">
+            <Link
+              href={pageHref(url, meta.currentPage - 1)}
+              className={cn(cell, 'border-line-2 hover:border-ink hover:bg-ink hover:text-paper')}
+              rel="prev"
+            >
               ← <span className="sr-only">Page précédente</span>
             </Link>
           </li>
@@ -75,7 +85,11 @@ export function Pagination({ meta, className }: { meta: PaginationMeta; classNam
         )}
         {meta.currentPage < meta.lastPage && (
           <li>
-            <Link href={pageHref(url, meta.currentPage + 1)} className={cn(cell, 'border-line-2 hover:border-ink hover:bg-ink hover:text-paper')} rel="next">
+            <Link
+              href={pageHref(url, meta.currentPage + 1)}
+              className={cn(cell, 'border-line-2 hover:border-ink hover:bg-ink hover:text-paper')}
+              rel="next"
+            >
               → <span className="sr-only">Page suivante</span>
             </Link>
           </li>

@@ -26,7 +26,12 @@ export default function SlideOver({
         >
           <div className="flex items-center justify-between border-b border-line px-5 py-4">
             <DialogTitle className="label text-ink">{title}</DialogTitle>
-            <button type="button" onClick={onClose} aria-label="Fermer" className="grid size-9 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fermer"
+              className="grid size-9 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink"
+            >
               <X size={18} />
             </button>
           </div>

@@ -80,17 +80,17 @@ export default function Navbar() {
             <ThemeToggle />
             {user ? (
               <>
-                <button
-                  type="button"
-                  onClick={() => setWriteOpen(true)}
-                  className={buttonClasses({
-                    variant: 'primary',
-                    size: 'sm',
-                    className: 'ml-1 hidden sm:inline-flex',
-                  })}
-                >
-                  <PenLine size={15} strokeWidth={2} /> Écrire
-                </button>
+                {/* Wrapper controls visibility: "hidden" on the button itself would
+                    compete with the button's own "inline-flex". */}
+                <div className="ml-1 hidden sm:block">
+                  <button
+                    type="button"
+                    onClick={() => setWriteOpen(true)}
+                    className={buttonClasses({ variant: 'primary', size: 'sm' })}
+                  >
+                    <PenLine size={15} strokeWidth={2} /> Écrire
+                  </button>
+                </div>
                 <Menu
                   buttonLabel="Menu du compte"
                   buttonClassName="ml-1.5 rounded-sm transition-transform hover:-translate-y-0.5"

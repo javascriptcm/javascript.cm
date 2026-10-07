@@ -30,7 +30,10 @@ export async function createReply(parent: ReplyParent, author: User, body: strin
       await trx
         .from(parent.type === 'thread' ? 'threads' : 'discussions')
         .where('id', parent.id)
-        .update({ replies_count: trx.raw('replies_count + 1'), last_activity_at: DateTime.now().toSQL() })
+        .update({
+          replies_count: trx.raw('replies_count + 1'),
+          last_activity_at: DateTime.now().toSQL(),
+        })
     }
     return reply
   })
@@ -52,28 +55,38 @@ export async function deleteReply(reply: Reply) {
     reply.useTransaction(trx)
     await reply.delete()
     if (reply.threadId) {
-      await trx.from('threads').where('id', reply.threadId).where('replies_count', '>', 0).decrement('replies_count', 1)
+      await trx
+        .from('threads')
+        .where('id', reply.threadId)
+        .where('replies_count', '>', 0)
+        .decrement('replies_count', 1)
     } else if (reply.discussionId) {
-      await trx.from('discussions').where('id', reply.discussionId).where('replies_count', '>', 0).decrement('replies_count', 1)
+      await trx
+        .from('discussions')
+        .where('id', reply.discussionId)
+        .where('replies_count', '>', 0)
+        .decrement('replies_count', 1)
     }
   })
 }
 
 /**
  * Query modifier: preload author, count likes and flag the viewer's likes.
- * Usage: Reply.query().where('thread_id', id).apply(withReplyMeta(user))
+ * Usage: withReplyMeta(user)(Reply.query().where('thread_id', id))
  * or inside preload: .preload('replies', (q) => withReplyMeta(user)(q))
  */
 export function withReplyMeta(viewer?: User | null) {
   return (query: ModelQueryBuilderContract<typeof Reply>) => {
-    query
-      .preload('author')
-      .withCount('likes')
-      .orderBy('created_at', 'asc')
+    query.preload('author').withCount('likes').orderBy('created_at', 'asc')
     if (viewer) {
-      query.select('replies.*').select(
-        db.raw('exists(select 1 from likes where likes.reply_id = replies.id and likes.user_id = ?) as liked_by_me', [viewer.id])
-      )
+      query
+        .select('replies.*')
+        .select(
+          db.raw(
+            'exists(select 1 from likes where likes.reply_id = replies.id and likes.user_id = ?) as liked_by_me',
+            [viewer.id]
+          )
+        )
     }
   }
 }

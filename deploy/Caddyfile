@@ -1,0 +1,24 @@
+# /etc/caddy/Caddyfile — managed by javascript.cm deploy
+staging.javascript.cm {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy 127.0.0.1:3333 {
+		health_uri /up
+		health_interval 30s
+	}
+
+	# Access logs go to journald: journalctl -u caddy
+	log
+}

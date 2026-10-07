@@ -38,9 +38,13 @@ export default class RepliesController {
    */
   async like({ params, auth, response }: HttpContext) {
     const reply = await Reply.findOrFail(params.id)
-    const existing = await Like.query().where('user_id', auth.user!.id).where('reply_id', reply.id).first()
+    const existing = await Like.query()
+      .where('user_id', auth.user!.id)
+      .where('reply_id', reply.id)
+      .first()
     if (existing) await existing.delete()
-    else if (reply.userId !== auth.user!.id) await Like.create({ userId: auth.user!.id, replyId: reply.id })
+    else if (reply.userId !== auth.user!.id)
+      await Like.create({ userId: auth.user!.id, replyId: reply.id })
     return response.redirect().back()
   }
 }

@@ -10,6 +10,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import db from '@adonisjs/lucid/services/db'
 import { middleware } from '#start/kernel'
 import { authThrottle } from '#start/limiter'
 
@@ -22,6 +23,22 @@ const SeoController = () => import('#controllers/seo_controller')
 const RepliesController = () => import('#controllers/replies_controller')
 
 router.get('/', [HomeController, 'index']).as('home')
+
+/*
+| Health check (Docker / uptime monitoring)
+*/
+router
+  .get('up', async ({ response }) => {
+    await db.rawQuery('select 1')
+    return response.ok({ status: 'ok' })
+  })
+  .as('health')
+
+/*
+| Static pages
+*/
+router.on('a-propos').renderInertia('pages/about', {}).as('pages.about')
+router.on('code-de-conduite').renderInertia('pages/code_of_conduct', {}).as('pages.code_of_conduct')
 
 /*
 | Authentication

@@ -1,3 +1,4 @@
+import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/shield'
 
 const shieldConfig = defineConfig({
@@ -7,18 +8,23 @@ const shieldConfig = defineConfig({
    */
   csp: {
     /**
-     * Enable the Content-Security-Policy header.
+     * Enabled in production only: Vite's dev server relies on inline scripts.
      */
-    enabled: false,
-
-    /**
-     * Per-resource CSP directives.
-     */
-    directives: {},
-
-    /**
-     * Report violations without blocking resources.
-     */
+    enabled: app.inProduction,
+    directives: {
+      defaultSrc: [`'self'`],
+      scriptSrc: [`'self'`, '@nonce'],
+      // Shiki (code highlighting) and a few components use inline styles.
+      styleSrc: [`'self'`, `'unsafe-inline'`],
+      // Avatars and article covers may be hosted anywhere over HTTPS.
+      imgSrc: [`'self'`, 'data:', 'https:'],
+      fontSrc: [`'self'`, 'data:'],
+      connectSrc: [`'self'`],
+      objectSrc: [`'none'`],
+      baseUri: [`'self'`],
+      formAction: [`'self'`],
+      frameAncestors: [`'none'`],
+    },
     reportOnly: false,
   },
 

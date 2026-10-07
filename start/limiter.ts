@@ -8,6 +8,7 @@
 |
 */
 
+import app from '@adonisjs/core/services/app'
 import limiter from '@adonisjs/limiter/services/main'
 
 /**
@@ -15,7 +16,7 @@ import limiter from '@adonisjs/limiter/services/main'
  */
 export const authThrottle = limiter.define('auth', (ctx) => {
   return limiter
-    .allowRequests(10)
+    .allowRequests(app.inProduction ? 10 : 1000)
     .every('5 minutes')
     .usingKey(`auth_${ctx.request.ip()}`)
     .limitExceeded((error) => {
@@ -28,7 +29,7 @@ export const authThrottle = limiter.define('auth', (ctx) => {
  */
 export const writeThrottle = limiter.define('write', (ctx) => {
   return limiter
-    .allowRequests(20)
+    .allowRequests(app.inProduction ? 20 : 1000)
     .every('10 minutes')
     .usingKey(`write_${ctx.auth.user?.id ?? ctx.request.ip()}`)
     .limitExceeded((error) => {

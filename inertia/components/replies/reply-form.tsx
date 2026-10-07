@@ -32,7 +32,9 @@ export function ReplyForm({
     return (
       <div className="rounded-sm border border-dashed border-line-2 px-6 py-6">
         <p className="label">Conversation verrouillée</p>
-        <p className="mt-2 text-[15px] text-ink-2">Les modérateurs ont fermé ce sujet aux nouvelles réponses.</p>
+        <p className="mt-2 text-[15px] text-ink-2">
+          Les modérateurs ont fermé ce sujet aux nouvelles réponses.
+        </p>
       </div>
     )
   }
@@ -42,7 +44,9 @@ export function ReplyForm({
       <div className="flex flex-col gap-4 rounded-sm border border-ink bg-card px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[18px] font-semibold tracking-[-0.015em]">Envie de participer ?</p>
-          <p className="mt-1 text-[15px] text-ink-2">Connectez-vous pour répondre et aider la communauté.</p>
+          <p className="mt-1 text-[15px] text-ink-2">
+            Connectez-vous pour répondre et aider la communauté.
+          </p>
         </div>
         <div className="flex gap-2">
           <ButtonLink href={`/login?redirect=${encodeURIComponent(page.url)}`} variant="secondary">
@@ -74,7 +78,11 @@ export function ReplyForm({
           compact
         />
         {form.errors.body && (
-          <p id="reply-body-error" className="mt-2 text-[13.5px] font-medium text-danger" role="alert">
+          <p
+            id="reply-body-error"
+            className="mt-2 text-[13.5px] font-medium text-danger"
+            role="alert"
+          >
             {form.errors.body}
           </p>
         )}

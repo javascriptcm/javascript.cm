@@ -3,7 +3,13 @@ import { cn } from '~/lib/format'
 /**
  * Plain anchor (not an Inertia visit): the OAuth flow leaves the site.
  */
-export function GithubButton({ label = 'Continuer avec GitHub', className }: { label?: string; className?: string }) {
+export function GithubButton({
+  label = 'Continuer avec GitHub',
+  className,
+}: {
+  label?: string
+  className?: string
+}) {
   return (
     <a
       href="/auth/github"

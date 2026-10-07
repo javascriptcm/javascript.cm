@@ -1,5 +1,6 @@
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
+import proxyAddr from 'proxy-addr'
 import { defineConfig } from '@adonisjs/core/http'
 
 /**
@@ -31,6 +32,13 @@ export const http = defineConfig({
    * from anywhere inside your application.
    */
   useAsyncLocalStorage: false,
+
+  /**
+   * The app only listens behind Caddy (host) and Docker's port proxy, so
+   * loopback and private-network hops are trusted. request.ip() then
+   * returns the real client IP (needed by the rate limiter).
+   */
+  trustProxy: proxyAddr.compile(['loopback', 'uniquelocal']),
 
   router: {
     matcher: 'tree',

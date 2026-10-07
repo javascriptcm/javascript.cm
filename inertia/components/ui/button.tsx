@@ -44,7 +44,7 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'size'> & {
   loading?: boolean
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function ButtonComponent(
   { variant, size, block, loading, className, children, disabled, type = 'button', ...props },
   ref
 ) {
@@ -69,7 +69,14 @@ type ButtonLinkProps = Omit<InertiaLinkProps, 'size'> & {
   children: ReactNode
 }
 
-export function ButtonLink({ variant, size, block, className, children, ...props }: ButtonLinkProps) {
+export function ButtonLink({
+  variant,
+  size,
+  block,
+  className,
+  children,
+  ...props
+}: ButtonLinkProps) {
   return (
     <Link className={buttonClasses({ variant, size, block, className })} {...props}>
       {children}

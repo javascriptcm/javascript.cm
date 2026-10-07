@@ -43,7 +43,9 @@ export default class SeoController {
   async sitemap({ response }: HttpContext) {
     const base = env.get('APP_URL')
     const [articles, threads, discussions, users] = await Promise.all([
-      Article.query().withScopes((s) => s.published()).select('slug', 'updated_at', 'published_at'),
+      Article.query()
+        .withScopes((s) => s.published())
+        .select('slug', 'updated_at', 'published_at'),
       Thread.query().select('slug', 'last_activity_at'),
       Discussion.query().select('slug', 'last_activity_at'),
       User.query().whereNull('banned_at').select('username', 'updated_at'),
@@ -60,8 +62,14 @@ export default class SeoController {
         lastmod: (a.updatedAt ?? a.publishedAt)?.toISODate() ?? undefined,
         priority: '0.8',
       })),
-      ...threads.map((t) => ({ loc: `/forum/${t.slug}`, lastmod: t.lastActivityAt.toISODate() ?? undefined })),
-      ...discussions.map((d) => ({ loc: `/discussions/${d.slug}`, lastmod: d.lastActivityAt.toISODate() ?? undefined })),
+      ...threads.map((t) => ({
+        loc: `/forum/${t.slug}`,
+        lastmod: t.lastActivityAt.toISODate() ?? undefined,
+      })),
+      ...discussions.map((d) => ({
+        loc: `/discussions/${d.slug}`,
+        lastmod: d.lastActivityAt.toISODate() ?? undefined,
+      })),
       ...users.map((u) => ({ loc: `/@${u.username}`, priority: '0.3' })),
     ]
 

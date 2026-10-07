@@ -59,7 +59,17 @@ export function MenuLink({
   )
 }
 
-export function MenuAction({ onClick, icon, children, danger }: { onClick: () => void; icon?: ReactNode; children: ReactNode; danger?: boolean }) {
+export function MenuAction({
+  onClick,
+  icon,
+  children,
+  danger,
+}: {
+  onClick: () => void
+  icon?: ReactNode
+  children: ReactNode
+  danger?: boolean
+}) {
   return (
     <MenuItem>
       <button type="button" onClick={onClick} className={cn(itemClasses, danger && 'text-danger')}>

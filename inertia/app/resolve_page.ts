@@ -5,7 +5,9 @@ import SiteLayout from '~/layouts/app'
 export const SITE_NAME = 'JavaScript Cameroun'
 
 export function pageTitle(title: string) {
-  return title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — la communauté des développeurs JavaScript du 237`
+  return title
+    ? `${title} — ${SITE_NAME}`
+    : `${SITE_NAME} — la communauté des développeurs JavaScript du 237`
 }
 
 /**

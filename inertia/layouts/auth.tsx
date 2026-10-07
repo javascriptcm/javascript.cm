@@ -14,7 +14,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Logo />
           <ThemeToggle />
         </div>
-        <main id="contenu" className="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center py-12">
+        <main
+          id="contenu"
+          className="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center py-12"
+        >
           {children}
         </main>
         <p className="label">© {new Date().getFullYear()} JavaScript Cameroun</p>
@@ -29,7 +32,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <p className="text-[clamp(3rem,6.4vw,6.5rem)] leading-[0.9] font-extrabold tracking-[-0.055em]">
             Le 237
             <br />
-            <span className="font-mono text-[0.42em] font-medium tracking-[-0.02em] text-paper/70 dark:text-muted">code en</span>
+            <span className="font-mono text-[0.42em] font-medium tracking-[-0.02em] text-paper/70 dark:text-muted">
+              code en
+            </span>
             <br />
             <span className="mark-full">JavaScript.</span>
           </p>
@@ -40,11 +45,16 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             ['Forum', 'Une question ? Quelqu’un a la réponse.'],
             ['Discussions', 'Carrière, outils, écosystème local.'],
           ].map(([title, text], i) => (
-            <div key={title} className="border-r border-paper/20 p-8 last:border-r-0 dark:border-line">
+            <div
+              key={title}
+              className="border-r border-paper/20 p-8 last:border-r-0 dark:border-line"
+            >
               <dt className="label text-js dark:text-ink">
                 0{i + 1} — {title}
               </dt>
-              <dd className="mt-3 text-[15px] leading-snug text-paper/75 dark:text-ink-2">{text}</dd>
+              <dd className="mt-3 text-[15px] leading-snug text-paper/75 dark:text-ink-2">
+                {text}
+              </dd>
             </div>
           ))}
         </dl>

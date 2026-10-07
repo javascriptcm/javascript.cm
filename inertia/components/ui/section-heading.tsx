@@ -21,7 +21,12 @@ export function SectionHeading({
   className?: string
 }) {
   return (
-    <div className={cn('flex flex-col gap-5 border-t border-ink pt-5 md:flex-row md:items-end md:justify-between', className)}>
+    <div
+      className={cn(
+        'flex flex-col gap-5 border-t border-ink pt-5 md:flex-row md:items-end md:justify-between',
+        className
+      )}
+    >
       <div className="max-w-3xl">
         <p className="label text-ink">
           {index && <span className="mr-2 text-muted">[{index}]</span>}
@@ -40,7 +45,10 @@ export function SectionHeading({
           className="group inline-flex shrink-0 items-center gap-2 font-mono text-[13px] font-medium uppercase tracking-[0.06em] text-ink"
         >
           <span className="link-draw">{action.label}</span>
-          <span aria-hidden="true" className="transition-transform duration-300 ease-out-expo group-hover:translate-x-1">
+          <span
+            aria-hidden="true"
+            className="transition-transform duration-300 ease-out-expo group-hover:translate-x-1"
+          >
             →
           </span>
         </Link>

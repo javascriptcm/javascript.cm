@@ -40,8 +40,18 @@ export function Seo({
       <meta head-key="og:description" property="og:description" content={desc} />
       <meta head-key="og:url" property="og:url" content={url} />
       {image && <meta head-key="og:image" property="og:image" content={image} />}
-      {publishedTime && <meta head-key="article:published_time" property="article:published_time" content={publishedTime} />}
-      <meta head-key="twitter:card" name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+      {publishedTime && (
+        <meta
+          head-key="article:published_time"
+          property="article:published_time"
+          content={publishedTime}
+        />
+      )}
+      <meta
+        head-key="twitter:card"
+        name="twitter:card"
+        content={image ? 'summary_large_image' : 'summary'}
+      />
       <meta head-key="twitter:site" name="twitter:site" content="@javascriptcm" />
       {noindex && <meta head-key="robots" name="robots" content="noindex, nofollow" />}
     </Head>
