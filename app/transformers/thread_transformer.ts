@@ -2,6 +2,7 @@ import type Thread from '#models/thread'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import UserTransformer from '#transformers/user_transformer'
 import ChannelTransformer from '#transformers/channel_transformer'
+import { plainExcerpt } from '#services/markdown'
 
 export default class ThreadTransformer extends BaseTransformer<Thread> {
   toObject() {
@@ -25,10 +26,21 @@ export default class ThreadTransformer extends BaseTransformer<Thread> {
     }
   }
 
+  /**
+   * Forum index rows: adds a short plain-text excerpt of the question.
+   */
+  forList() {
+    return {
+      ...this.toObject(),
+      excerpt: plainExcerpt(this.resource.body, 170),
+    }
+  }
+
   forDetail() {
     return {
       ...this.toObject(),
       bodyHtml: this.resource.bodyHtml,
+      excerpt: plainExcerpt(this.resource.body, 160),
     }
   }
 
