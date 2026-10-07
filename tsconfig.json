@@ -2,8 +2,8 @@
   "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "compilerOptions": {
     "rootDir": "./",
-    "outDir": "./build",
+    "jsx": "react",
+    "outDir": "./build"
   },
-  "exclude": ["./inertia/**/*", "node_modules", "build"],
-  
+  "references": [{ "path": "./tsconfig.inertia.json" }]
 }

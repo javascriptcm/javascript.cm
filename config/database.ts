@@ -1,11 +1,16 @@
 import env from '#start/env'
+import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
-  connection: 'mysql',
+  /**
+   * Default connection used for all queries.
+   */
+  connection: 'pg',
+
   connections: {
-    mysql: {
-      client: 'mysql2',
+    pg: {
+      client: 'pg',
       connection: {
         host: env.get('DB_HOST'),
         port: env.get('DB_PORT'),
@@ -17,6 +22,11 @@ const dbConfig = defineConfig({
         naturalSort: true,
         paths: ['database/migrations'],
       },
+      schemaGeneration: {
+        enabled: true,
+        rulesPaths: ['./database/schema_rules.js'],
+      },
+      debug: app.inDev && env.get('DB_DEBUG', false),
     },
   },
 })

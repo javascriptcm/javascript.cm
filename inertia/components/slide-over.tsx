@@ -1,59 +1,38 @@
-import { Fragment } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { X } from 'lucide-react'
+import type { ReactNode } from 'react'
 
-interface SlideOverProps {
-  isOpen: boolean
+/**
+ * Right-hand panel (e.g. filters on mobile).
+ */
+export default function SlideOver({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean
   onClose: () => void
   title: string
-  children: React.ReactNode
-}
-
-export default function SlideOver({ isOpen, onClose, title, children }: SlideOverProps) {
+  children: ReactNode
+}) {
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <div className="fixed inset-0" />
-
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
-              <Transition.Child
-                as={Fragment}
-                enter="transform transition ease-in-out duration-500 sm:duration-700"
-                enterFrom="translate-x-full"
-                enterTo="translate-x-0"
-                leave="transform transition ease-in-out duration-500 sm:duration-700"
-                leaveFrom="translate-x-0"
-                leaveTo="translate-x-full"
-              >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-7xl">
-                  <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
-                    <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-                      <div className="flex items-center justify-between px-4 py-4 sm:px-6">
-                        <Dialog.Title className="text-base font-semibold leading-6 text-gray-900">
-                          {title}
-                        </Dialog.Title>
-                        <div className="ml-3 flex h-7 items-center">
-                          <button
-                            type="button"
-                            className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-                            onClick={onClose}
-                          >
-                            <span className="sr-only">Close panel</span>
-                            <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="relative flex-1 px-4 py-6 sm:px-6">{children}</div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+    <Dialog open={open} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-ink/40" aria-hidden="true" />
+      <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
+        <DialogPanel
+          transition
+          className="flex w-screen max-w-sm flex-col border-l border-ink bg-paper transition duration-300 ease-out-expo data-closed:translate-x-full"
+        >
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <DialogTitle className="label text-ink">{title}</DialogTitle>
+            <button type="button" onClick={onClose} aria-label="Fermer" className="grid size-9 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink">
+              <X size={18} />
+            </button>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+          <div className="flex-1 overflow-y-auto px-5 py-6">{children}</div>
+        </DialogPanel>
+      </div>
+    </Dialog>
   )
 }

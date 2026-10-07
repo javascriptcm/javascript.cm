@@ -9,7 +9,6 @@ import type { NextFn } from '@adonisjs/core/types/http'
  */
 export default class SilentAuthMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
-    // Check authentication without redirecting
     await ctx.auth.check()
 
     return next()

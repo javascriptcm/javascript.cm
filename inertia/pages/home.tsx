@@ -1,179 +1,192 @@
-import { Head, Link } from '@inertiajs/react'
-import Navbar from '../components/navbar'
-import ArticlesSection from '../components/articles-section'
-import OpenSourceSection from '../components/open-source-section'
-import Footer from '../components/footer'
+import { Link, usePage } from '@inertiajs/react'
+import type { Data } from '@generated/data'
+import { Seo } from '~/components/seo'
+import ArticlesSection from '~/components/articles-section'
+import OpenSourceSection from '~/components/open-source-section'
+import { ThreadList } from '~/components/forum/thread-list'
+import { DiscussionList } from '~/components/discussions/discussion-list'
+import { SectionHeading } from '~/components/ui/section-heading'
+import { EmptyState } from '~/components/ui/empty-state'
+import { Avatar } from '~/components/ui/avatar'
+import { ButtonLink } from '~/components/ui/button'
+import { formatNumber } from '~/lib/format'
 
-interface HomeProps {
-  stats: {
-    members: number
-    developers: number
-    participation: number
-    githubStars: number
-  }
-  articles: Array<{
-    id: number
-    title: string
-    slug: string
-    excerpt: string
-    author: {
-      name: string
-      username: string
-    }
-    createdAt: string
-  }>
+type Props = {
+  stats: { members: number; articles: number; threads: number; replies: number; solvedRate: number }
+  articles: Data.Article[]
+  threads: Data.Thread[]
+  discussions: Data.Discussion[]
+  members: Data.User[]
 }
 
-export default function Home({ stats, articles }: HomeProps) {
+function todayLabel() {
+  return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(
+    new Date()
+  )
+}
+
+export default function Home({ stats, articles, threads, discussions, members }: Props) {
+  const { user } = usePage().props
+
+  const readings = [
+    { label: 'Membres', value: formatNumber(stats.members) },
+    { label: 'Articles publiés', value: formatNumber(stats.articles) },
+    { label: 'Questions posées', value: formatNumber(stats.threads) },
+    { label: 'Taux de résolution', value: `${stats.solvedRate}%` },
+  ]
+
   return (
     <>
-      <Head title="JavaScript Cameroun - La plus grande communauté de développeurs JavaScript au Cameroun" />
+      <Seo title="" path="/" />
 
-      <Navbar />
-
-      {/* Hero Section */}
-      <div className="overflow-hidden bg-white">
-        <div className="mx-auto max-w-7xl">
-          <div className="pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
-            <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28 flex flex-col items-center justify-center lg:flex-row">
-              <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-                  <span className="block">JavaScript Cameroun</span>
-                </h1>
-                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                  Bienvenue sur le site de la communauté des développeurs JavaScript du Cameroun, le
-                  plus gros rassemblement de développeurs au Cameroun.
-                </p>
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow">
-                    <Link
-                      href="/register"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg"
-                    >
-                      Rejoindre la communauté
-                    </Link>
-                  </div>
-                  <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <Link
-                      href="/forum"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 px-8 py-3 text-base font-medium text-indigo-700 hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
-                    >
-                      Visiter le Forum
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="lg:w-1/2 flex justify-center items-center">
-                <img
-                  className="h-56 w-full object-cover sm:h-72 md:h-96 lg:h-full lg:w-[85%]"
-                  src="/resources/images/undraw_programming_65t2.svg"
-                  alt="Programming"
-                />
-              </div>
-            </main>
-          </div>
-        </div>
-      </div>
-
-      {/* Partners Section */}
-      <div className="bg-white py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-base font-semibold text-gray-500">
-            Nous travaillons avec d'autres communautés et startups
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-4">
-            <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
-              <img
-                className="h-12"
-                src="/resources/images/partners/undraw_in-the-zone_07y7.svg"
-                alt="Laravel Cameroun"
-              />
-            </div>
-            <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
-              <img
-                className="h-12"
-                src="/resources/images/partners/undraw_quiet-street_v45k.svg"
-                alt="GDG Douala"
-              />
-            </div>
-            <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
-              <img
-                className="h-12"
-                src="/resources/images/partners/undraw_in-the-zone_07y7.svg"
-                alt="Laravel Cameroun"
-              />
-            </div>
-            <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
-              <img
-                className="h-12"
-                src="/resources/images/partners/undraw_quiet-street_v45k.svg"
-                alt="GDG Douala"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="bg-gray-50 pt-12 sm:pt-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              A propos
-            </h2>
-            <p className="mt-3 text-xl text-gray-500 sm:mt-4">
-              Nous construisons une communauté Open Source d'apprenants et d'enseignants
+      {/* Hero — typographic poster */}
+      <section aria-labelledby="hero-title" className="border-b border-line">
+        <div className="shell">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-b border-line py-3">
+            <p className="label" suppressHydrationWarning>
+              Édition du {todayLabel()}
             </p>
+            <p className="label hidden md:block">Douala · Yaoundé · Buea · Bamenda · Garoua</p>
+            <p className="label">4.05° N — 9.70° E</p>
           </div>
-        </div>
-        <div className="mt-10 bg-white pb-12 sm:pb-16">
-          <div className="relative">
-            <div className="absolute inset-0 h-1/2 bg-gray-50" />
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="mx-auto max-w-4xl">
-                <dl className="rounded-lg bg-white shadow-lg sm:grid sm:grid-cols-4">
-                  <div className="flex flex-col border-b border-gray-100 p-6 text-center sm:border-0 sm:border-r">
-                    <dt className="order-2 mt-2 text-lg font-medium leading-6 text-gray-500">
-                      Membres
-                    </dt>
-                    <dd className="order-1 text-5xl font-bold tracking-tight text-indigo-600">
-                      {stats.members}+
-                    </dd>
-                  </div>
-                  <div className="flex flex-col border-t border-b border-gray-100 p-6 text-center sm:border-0 sm:border-l sm:border-r">
-                    <dt className="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">
-                      Développeurs
-                    </dt>
-                    <dd className="order-1 text-5xl font-extrabold text-indigo-600">
-                      {stats.developers}K+
-                    </dd>
-                  </div>
-                  <div className="flex flex-col border-t border-gray-100 p-6 text-center sm:border-0 sm:border-l sm:border-r">
-                    <dt className="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">
-                      Participation
-                    </dt>
-                    <dd className="order-1 text-5xl font-extrabold text-indigo-600">
-                      {stats.participation}%
-                    </dd>
-                  </div>
-                  <div className="flex flex-col border-t border-gray-100 p-6 text-center sm:border-0 sm:border-l">
-                    <dt className="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">
-                      GitHub Stars
-                    </dt>
-                    <dd className="order-1 text-5xl font-extrabold text-indigo-600">
-                      {stats.githubStars}K+
-                    </dd>
-                  </div>
-                </dl>
+
+          <div className="grid gap-10 pt-12 pb-14 sm:pt-16 lg:grid-cols-12 lg:gap-8 lg:pt-20 lg:pb-20">
+            <h1
+              id="hero-title"
+              className="text-[clamp(4rem,14vw,10rem)] leading-[0.84] font-extrabold tracking-[-0.06em] lg:col-span-9"
+            >
+              <span className="rise block">Le 237</span>
+              <span className="rise rise-1 block pl-[0.08em] font-mono text-[0.3em] leading-[1.5] font-medium tracking-[-0.02em] text-ink-2 sm:pl-[1.4em]">
+                code en
+              </span>
+              <span className="rise rise-2 block">
+                <span className="mark mark-sweep">JavaScript.</span>
+              </span>
+            </h1>
+
+            <div className="rise rise-3 flex flex-col justify-end lg:col-span-3">
+              <p className="text-[18px] leading-relaxed text-ink-2">
+                La communauté des développeurs JavaScript du Cameroun. Des articles, un forum d’entraide et des
+                discussions — de Node.js à React, de TypeScript au mobile.
+              </p>
+              <div className="mt-7 flex flex-col gap-2 sm:flex-row lg:flex-col">
+                {user ? (
+                  <>
+                    <ButtonLink href="/articles/nouveau" size="lg">
+                      Écrire un article
+                    </ButtonLink>
+                    <ButtonLink href="/forum/nouveau" variant="secondary" size="lg">
+                      Poser une question
+                    </ButtonLink>
+                  </>
+                ) : (
+                  <>
+                    <ButtonLink href="/register" size="lg">
+                      Rejoindre la communauté
+                    </ButtonLink>
+                    <ButtonLink href="/forum" variant="secondary" size="lg">
+                      Visiter le forum
+                    </ButtonLink>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Instrument readout */}
+        <dl className="shell grid grid-cols-2 border-t border-line lg:grid-cols-4">
+          {readings.map((reading, i) => (
+            <div
+              key={reading.label}
+              className={`py-6 ${i % 2 === 1 ? 'border-l border-line pl-5 sm:pl-8' : ''} ${i >= 2 ? 'border-t border-line lg:border-t-0' : ''} ${i === 2 ? 'lg:border-l lg:pl-8' : ''}`}
+            >
+              <dt className="label">
+                <span className="text-ink">{String(i + 1).padStart(2, '0')}</span> {reading.label}
+              </dt>
+              <dd className="mt-2 text-[clamp(2.2rem,4.5vw,3.4rem)] leading-none font-bold tracking-[-0.04em] tabular-nums">
+                {reading.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       <ArticlesSection articles={articles} />
+
+      {/* Forum */}
+      <section aria-labelledby="home-forum" className="shell mt-24 sm:mt-32">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28">
+              <SectionHeading
+                index="02"
+                label="Forum d’entraide"
+                title={
+                  <span id="home-forum">
+                    Bloqué ? <span className="mark">Demandez.</span>
+                  </span>
+                }
+                description="Une erreur que vous ne comprenez pas, un choix d’architecture, une config qui résiste : quelqu’un est déjà passé par là."
+              />
+              <div className="mt-8 flex flex-wrap gap-2">
+                <ButtonLink href="/forum/nouveau">Poser une question</ButtonLink>
+                <ButtonLink href="/forum" variant="ghost">
+                  Tout le forum →
+                </ButtonLink>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-ink lg:col-span-8">
+            {threads.length ? (
+              <ThreadList threads={threads} />
+            ) : (
+              <EmptyState className="mt-6" code="FRM" title="Aucune question pour l’instant." description="Posez la première question du forum." />
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Discussions + members */}
+      <section className="shell mt-24 grid gap-14 sm:mt-32 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-7">
+          <SectionHeading
+            index="03"
+            label="Discussions"
+            title="Carrière, outils, écosystème."
+            action={{ href: '/discussions', label: 'Toutes les discussions' }}
+          />
+          <div className="mt-4">
+            {discussions.length ? (
+              <DiscussionList discussions={discussions} />
+            ) : (
+              <EmptyState className="mt-6" code="DSC" title="Aucune discussion ouverte." description="Lancez le premier sujet." />
+            )}
+          </div>
+        </div>
+        <aside className="lg:col-span-5" aria-labelledby="home-members">
+          <div className="border-t border-ink pt-5">
+            <p className="label text-ink" id="home-members">
+              <span className="mr-2 text-muted">[—]</span>Derniers arrivés
+            </p>
+            <ul className="mt-6 grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-4">
+              {members.map((member) => (
+                <li key={member.id}>
+                  <Link href={`/@${member.username}`} className="group flex flex-col items-start gap-2" title={member.displayName}>
+                    <Avatar user={member} size="lg" className="transition-transform duration-300 ease-out-expo group-hover:-translate-y-1" />
+                    <span className="w-full truncate font-mono text-[11.5px] text-muted group-hover:text-ink">@{member.username}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link href="/membres" className="mt-6 inline-flex items-center gap-2 font-mono text-[13px] font-medium tracking-[0.06em] uppercase">
+              <span className="link-draw">L’annuaire des membres</span> →
+            </Link>
+          </div>
+        </aside>
+      </section>
+
       <OpenSourceSection />
-      <Footer />
     </>
   )
 }

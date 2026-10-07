@@ -1,23 +1,23 @@
-/// <reference path="../../adonisrc.ts" />
-/// <reference path="../../config/inertia.ts" />
-
 import '../css/app.css'
+import { client } from '../client'
 import { hydrateRoot } from 'react-dom/client'
+import { TuyauProvider } from '@adonisjs/inertia/react'
 import { createInertiaApp } from '@inertiajs/react'
-import { resolvePageComponent } from '@adonisjs/inertia/helpers'
-
-const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
+import { resolvePage, pageTitle } from './resolve_page'
 
 createInertiaApp({
-  progress: { color: '#5468FF' },
-
-  title: (title) => `${title} - ${appName}`,
-
-  resolve: (name) => {
-    return resolvePageComponent(`../pages/${name}.tsx`, import.meta.glob('../pages/**/*.tsx'))
-  },
-
+  title: pageTitle,
+  resolve: (name) => resolvePage(name, import.meta.glob('../pages/**/*.tsx')),
   setup({ el, App, props }) {
-    hydrateRoot(el, <App {...props} />)
+    hydrateRoot(
+      el,
+      <TuyauProvider client={client}>
+        <App {...props} />
+      </TuyauProvider>
+    )
+  },
+  progress: {
+    color: '#F7DF1E',
+    showSpinner: false,
   },
 })

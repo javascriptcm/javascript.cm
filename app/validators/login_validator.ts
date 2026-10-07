@@ -1,12 +1,10 @@
 import vine from '@vinejs/vine'
 
 /**
- * Validates the login action
+ * Login with e-mail or username.
  */
-export const loginValidator = vine.compile(
-  vine.object({
-    email: vine.string().email(),
-    password: vine.string().minLength(6),
-    remember: vine.boolean().optional(),
-  })
-)
+export const loginValidator = vine.create({
+  login: vine.string().trim().minLength(2).maxLength(254),
+  password: vine.string().minLength(1).maxLength(128),
+  remember: vine.boolean().optional(),
+})

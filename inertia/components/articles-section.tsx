@@ -1,83 +1,47 @@
-import { Link } from '@inertiajs/react'
+import type { Data } from '@generated/data'
+import { ArticleFeature, ArticleRow } from '~/components/articles/list'
+import { SectionHeading } from '~/components/ui/section-heading'
+import { EmptyState } from '~/components/ui/empty-state'
+import { ButtonLink } from '~/components/ui/button'
 
-interface Article {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  author: {
-    name: string
-    username: string
-  }
-  createdAt: string
-}
+/**
+ * Home: lead story on the left, the next four as a numbered index.
+ */
+export default function ArticlesSection({ articles }: { articles: Data.Article[] }) {
+  const [lead, ...rest] = articles
 
-interface ArticlesSectionProps {
-  articles: Article[]
-}
-
-export default function ArticlesSection({ articles }: ArticlesSectionProps) {
   return (
-    <div className="bg-white py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="lg:text-center">
-          <h2 className="text-3xl font-semibold text-gray-900">Articles Populaires</h2>
-          <p className="mt-4 text-lg text-gray-600">
-            Découvrez les articles les plus appréciés et partagés par les membres de la communauté
-          </p>
+    <section aria-labelledby="home-articles" className="shell mt-24 sm:mt-32">
+      <SectionHeading
+        index="01"
+        label="Le fil des articles"
+        title={
+          <span id="home-articles">
+            Ce qui s’écrit <span className="mark">en ce moment</span>.
+          </span>
+        }
+        action={{ href: '/articles', label: 'Tous les articles' }}
+      />
+      {lead ? (
+        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7 lg:border-r lg:border-line lg:pr-12">
+            <ArticleFeature article={lead} />
+          </div>
+          <div className="lg:col-span-5">
+            {rest.map((article, i) => (
+              <ArticleRow key={article.id} article={article} index={i + 2} showExcerpt={false} />
+            ))}
+          </div>
         </div>
-
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <article
-              key={article.id}
-              className="flex flex-col rounded-lg shadow-lg overflow-hidden"
-            >
-              <div className="flex-1 bg-white p-6 flex flex-col justify-between">
-                <div className="flex-1">
-                  <Link href={`/articles/${article.slug}`} className="block mt-2">
-                    <p className="text-xl font-semibold text-gray-900">{article.title}</p>
-                    <p className="mt-3 text-base text-gray-500">{article.excerpt}</p>
-                  </Link>
-                </div>
-                <div className="mt-6 flex items-center">
-                  <div className="flex-shrink-0">
-                    <Link href={`/@${article.author.username}`}>
-                      <span className="sr-only">{article.author.name}</span>
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={`https://ui-avatars.com/api/?name=${article.author.name}`}
-                        alt=""
-                      />
-                    </Link>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">
-                      <Link href={`/@${article.author.username}`} className="hover:underline">
-                        {article.author.name}
-                      </Link>
-                    </p>
-                    <div className="flex space-x-1 text-sm text-gray-500">
-                      <time dateTime={article.createdAt}>
-                        {new Date(article.createdAt).toLocaleDateString()}
-                      </time>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <Link
-            href="/articles"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
-          >
-            Voir tous les articles
-          </Link>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <EmptyState
+          className="mt-10"
+          code="ART"
+          title="Aucun article pour l’instant."
+          description="Le premier article de la communauté pourrait être le vôtre : un tutoriel, un retour d’expérience, une astuce."
+          action={<ButtonLink href="/articles/nouveau">Écrire le premier article</ButtonLink>}
+        />
+      )}
+    </section>
   )
 }

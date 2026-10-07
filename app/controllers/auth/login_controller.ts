@@ -1,39 +1,40 @@
-import { loginValidator } from '#validators/login_validator'
-import { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import { errors } from '@adonisjs/auth'
+import { loginValidator } from '#validators/login_validator'
+import type { HttpContext } from '@adonisjs/core/http'
+import { safeRedirectPath } from '#services/safe_redirect'
 
 export default class LoginController {
-  async show({ inertia }: HttpContext) {
-    return inertia.render('auth/login')
+  async show({ inertia, request }: HttpContext) {
+    return inertia.render('auth/login', {
+      redirect: safeRedirectPath(request.input('redirect'), ''),
+    })
   }
 
-  async login({ request, auth, response, session }: HttpContext) {
+  async store({ request, auth, response, session }: HttpContext) {
+    const { login, password, remember } = await request.validateUsing(loginValidator)
+
+    let user: User
     try {
-      // Validate the request data
-      const data = await loginValidator.validate(request.all())
-
-      // Attempt to verify credentials
-      const user = await User.verifyCredentials(data.email, data.password)
-
-      // Login the user
-      await auth.use('web').login(user, data.remember)
-
-      return response.redirect().toRoute('dashboard')
-    } catch (error) {
-      if (error instanceof errors.E_INVALID_CREDENTIALS) {
-        session.flash('errors', { form: 'Invalid credentials' })
-        return response.redirect().back()
-      }
-
-      // Handle other errors
-      session.flash('errors', { form: 'An error occurred during login' })
+      user = await User.verifyCredentials(login.toLowerCase(), password)
+    } catch {
+      session.flashExcept(['password'])
+      session.flash('inputErrorsBag', { login: ['Identifiants incorrects.'] })
       return response.redirect().back()
     }
+
+    if (user.isBanned) {
+      session.flash('error', 'Ce compte a été suspendu. Contactez l’équipe si vous pensez à une erreur.')
+      return response.redirect().back()
+    }
+
+    await auth.use('web').login(user, Boolean(remember))
+    session.flash('success', `Bon retour, ${user.displayName} !`)
+    return response.redirect().toPath(safeRedirectPath(request.input('redirect')))
   }
 
-  async logout({ auth, response }: HttpContext) {
+  async destroy({ auth, response, session }: HttpContext) {
     await auth.use('web').logout()
-    return response.redirect().toRoute('login')
+    session.flash('success', 'Vous êtes déconnecté. À bientôt !')
+    return response.redirect().toRoute('home')
   }
 }
