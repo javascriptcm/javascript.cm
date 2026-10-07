@@ -12,7 +12,7 @@
 import router from '@adonisjs/core/services/router'
 import db from '@adonisjs/lucid/services/db'
 import { middleware } from '#start/kernel'
-import { authThrottle } from '#start/limiter'
+import { actionThrottle, authThrottle, previewThrottle } from '#start/limiter'
 
 const HomeController = () => import('#controllers/home_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
@@ -62,7 +62,7 @@ router.post('logout', [LoginController, 'destroy']).as('logout').use(middleware.
 router
   .post('markdown/preview', [MarkdownController, 'preview'])
   .as('markdown.preview')
-  .use(middleware.auth())
+  .use([middleware.auth(), previewThrottle])
 
 /*
 | Replies (shared by forum threads, discussions and article comments)
@@ -74,7 +74,7 @@ router
     router.post('replies/:id/like', [RepliesController, 'like']).as('replies.like')
   })
   .where('id', router.matchers.number())
-  .use(middleware.auth())
+  .use([middleware.auth(), actionThrottle])
 
 /*
 | SEO

@@ -49,9 +49,10 @@ const bodyParserConfig = defineConfig({
    */
   multipart: {
     /**
-     * Automatically process uploaded files into the system tmp directory.
+     * The site has no file upload: never write multipart bodies to disk
+     * (they would be stored before CSRF validation and never cleaned up).
      */
-    autoProcess: true,
+    autoProcess: false,
 
     /**
      * Normalize empty string values to null.

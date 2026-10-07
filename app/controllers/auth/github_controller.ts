@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import string from '@adonisjs/core/helpers/string'
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
@@ -28,12 +29,22 @@ export default class GithubController {
 
     if (!user && profile.email) {
       // Link the GitHub account to an existing account with the same e-mail.
-      user = await User.findBy('email', profile.email.toLowerCase())
-      if (user) {
-        user.githubId = profile.id
-        user.githubUsername = profile.login
-        user.avatarUrl = user.avatarUrl ?? profile.avatarUrl
-        await user.save()
+      const existing = await User.findBy('email', profile.email.toLowerCase())
+      if (existing && !existing.emailVerifiedAt) {
+        // Local e-mails are not verified: auto-linking would let anyone who
+        // registered with someone else's address capture their GitHub login.
+        session.flash(
+          'error',
+          'Un compte existe déjà avec cette adresse e-mail. Connectez-vous avec votre mot de passe.'
+        )
+        return response.redirect().toRoute('login')
+      }
+      if (existing) {
+        existing.githubId = profile.id
+        existing.githubUsername = profile.login
+        existing.avatarUrl = existing.avatarUrl ?? profile.avatarUrl
+        await existing.save()
+        user = existing
       }
     }
 
@@ -59,6 +70,8 @@ export default class GithubController {
         twitterUsername: profile.twitterUsername,
         password: null,
         role: 'member',
+        // GitHub only returns verified addresses.
+        emailVerifiedAt: DateTime.now(),
       })
       session.flash('success', `Bienvenue dans la communauté, ${user.displayName} !`)
     } else {

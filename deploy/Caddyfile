@@ -2,6 +2,11 @@
 staging.javascript.cm {
 	encode zstd gzip
 
+	# No uploads on the site: cap request bodies (articles are < 100 KB).
+	request_body {
+		max_size 1MB
+	}
+
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"

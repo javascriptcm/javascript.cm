@@ -159,3 +159,41 @@ test.group('Authentication', (group) => {
     assert.notInclude(response.body().html, '<script')
   })
 })
+
+test.group('Security regressions', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('changing the e-mail clears its verification', async ({ client, assert }) => {
+    const user = await makeUser({ emailVerifiedAt: DateTime.now() })
+    await client
+      .put('/settings')
+      .json({
+        name: 'Ngono Ateba',
+        username: 'ngono',
+        email: 'autre@example.test',
+        bio: null,
+        location: null,
+        websiteUrl: null,
+        avatarUrl: null,
+        githubUsername: null,
+        twitterUsername: null,
+        linkedinUsername: null,
+      })
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+    await user.refresh()
+    assert.equal(user.email, 'autre@example.test')
+    assert.isNull(user.emailVerifiedAt)
+  })
+
+  test('multipart bodies are never written to disk', async ({ client }) => {
+    const response = await client
+      .post('/login')
+      .file('payload', Buffer.from('x'.repeat(1024)), { filename: 'big.bin' })
+      .withCsrfToken()
+      .redirects(0)
+    // Fields are not parsed either: the login is rejected by validation.
+    response.assertStatus(302)
+  })
+})

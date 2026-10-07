@@ -36,3 +36,26 @@ export const writeThrottle = limiter.define('write', (ctx) => {
       error.setMessage('Vous publiez trop vite. Patientez quelques minutes.')
     })
 })
+
+/**
+ * Cheap one-click actions and edits (likes, solutions, pin/lock, updates).
+ */
+export const actionThrottle = limiter.define('action', (ctx) => {
+  return limiter
+    .allowRequests(app.inProduction ? 120 : 2000)
+    .every('10 minutes')
+    .usingKey(`action_${ctx.auth.user?.id ?? ctx.request.ip()}`)
+    .limitExceeded((error) => {
+      error.setMessage('Trop d’actions en peu de temps. Patientez quelques minutes.')
+    })
+})
+
+/**
+ * Markdown preview in the editor.
+ */
+export const previewThrottle = limiter.define('preview', (ctx) => {
+  return limiter
+    .allowRequests(app.inProduction ? 60 : 2000)
+    .every('5 minutes')
+    .usingKey(`preview_${ctx.auth.user?.id ?? ctx.request.ip()}`)
+})

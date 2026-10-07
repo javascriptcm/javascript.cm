@@ -18,12 +18,14 @@ const COLUMN = { thread: 'threadId', discussion: 'discussionId', article: 'artic
  * Create a reply, keep the parent's counters / activity timestamp in sync.
  */
 export async function createReply(parent: ReplyParent, author: User, body: string) {
+  // Render first: never hold a transaction open while markdown renders.
+  const bodyHtml = await renderMarkdown(body)
   return db.transaction(async (trx) => {
     const reply = new Reply().useTransaction(trx)
     reply.userId = author.id
     reply[COLUMN[parent.type]] = parent.id
     reply.body = body
-    reply.bodyHtml = await renderMarkdown(body)
+    reply.bodyHtml = bodyHtml
     await reply.save()
 
     if (parent.type === 'thread' || parent.type === 'discussion') {
@@ -52,18 +54,18 @@ export async function updateReply(reply: Reply, body: string) {
  */
 export async function deleteReply(reply: Reply) {
   await db.transaction(async (trx) => {
-    reply.useTransaction(trx)
-    await reply.delete()
-    if (reply.threadId) {
+    // Two concurrent deletes: only the one that removed the row decrements.
+    const deleted = await trx.from('replies').where('id', reply.id).delete()
+    if (!Number(deleted)) return
+    const parent = reply.threadId
+      ? { table: 'threads', id: reply.threadId }
+      : reply.discussionId
+        ? { table: 'discussions', id: reply.discussionId }
+        : null
+    if (parent) {
       await trx
-        .from('threads')
-        .where('id', reply.threadId)
-        .where('replies_count', '>', 0)
-        .decrement('replies_count', 1)
-    } else if (reply.discussionId) {
-      await trx
-        .from('discussions')
-        .where('id', reply.discussionId)
+        .from(parent.table)
+        .where('id', parent.id)
         .where('replies_count', '>', 0)
         .decrement('replies_count', 1)
     }

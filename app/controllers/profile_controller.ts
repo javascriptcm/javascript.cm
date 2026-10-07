@@ -57,10 +57,25 @@ export type ReplySummary = ReturnType<typeof replySummary>
  * Query modifier: the parents a reply summary needs (only light columns).
  */
 export function withReplyParents(query: ModelQueryBuilderContract<typeof Reply>) {
-  return query
-    .preload('thread', (q) => q.select('id', 'slug', 'title', 'solution_reply_id'))
-    .preload('discussion', (q) => q.select('id', 'slug', 'title'))
-    .preload('article', (q) => q.select('id', 'slug', 'title'))
+  return (
+    query
+      // Comments on articles that went back to draft must not leak their title.
+      .where((q) =>
+        q
+          .whereNull('replies.article_id')
+          .orWhereIn(
+            'replies.article_id',
+            db
+              .from('articles')
+              .select('id')
+              .whereNotNull('published_at')
+              .where('published_at', '<=', db.raw('now()'))
+          )
+      )
+      .preload('thread', (q) => q.select('id', 'slug', 'title', 'solution_reply_id'))
+      .preload('discussion', (q) => q.select('id', 'slug', 'title'))
+      .preload('article', (q) => q.select('id', 'slug', 'title'))
+  )
 }
 
 export default class ProfileController {

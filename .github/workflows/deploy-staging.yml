@@ -53,7 +53,19 @@ jobs:
       name: staging
       url: https://staging.javascript.cm
     steps:
+      - name: Check deploy secrets
+        id: secrets
+        env:
+          HOST: ${{ secrets.STAGING_HOST }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "::warning title=Deploy skipped::STAGING_SSH_KEY, STAGING_KNOWN_HOSTS, STAGING_HOST and STAGING_SSH_USER secrets are not configured."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Configure SSH
+        if: steps.secrets.outputs.ready == 'true'
         run: |
           install -m 700 -d ~/.ssh
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
@@ -61,4 +73,5 @@ jobs:
           echo "${{ secrets.STAGING_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       # The key is restricted server-side (forced command): it can only run the deploy script.
       - name: Deploy
+        if: steps.secrets.outputs.ready == 'true'
         run: ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} deploy

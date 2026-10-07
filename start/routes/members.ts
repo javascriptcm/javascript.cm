@@ -6,7 +6,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import { authThrottle } from '#start/limiter'
+import { actionThrottle, authThrottle } from '#start/limiter'
 
 const MembersController = () => import('#controllers/members_controller')
 const ProfileController = () => import('#controllers/profile_controller')
@@ -20,14 +20,20 @@ router.get('dashboard', [DashboardController, 'index']).as('dashboard').use(midd
 router
   .group(() => {
     router.get('/', [SettingsController, 'profile']).as('settings.profile')
-    router.put('/', [SettingsController, 'updateProfile']).as('settings.profile.update')
+    router
+      .put('/', [SettingsController, 'updateProfile'])
+      .as('settings.profile.update')
+      .use(actionThrottle)
     router.get('password', [SettingsController, 'password']).as('settings.password')
     router
       .put('password', [SettingsController, 'updatePassword'])
       .as('settings.password.update')
       .use(authThrottle)
     router.get('account', [SettingsController, 'account']).as('settings.account')
-    router.delete('account', [SettingsController, 'destroyAccount']).as('settings.account.destroy')
+    router
+      .delete('account', [SettingsController, 'destroyAccount'])
+      .as('settings.account.destroy')
+      .use(actionThrottle)
   })
   .prefix('settings')
   .use(middleware.auth())

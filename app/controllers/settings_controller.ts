@@ -43,6 +43,11 @@ export default class SettingsController {
     )
 
     const usernameChanged = data.username !== user.username
+    if (data.email !== user.email) {
+      // A new address is unverified until proven otherwise (GitHub sign-in
+      // only links accounts whose e-mail is verified).
+      user.emailVerifiedAt = null
+    }
     user.merge({
       name: data.name,
       username: data.username,

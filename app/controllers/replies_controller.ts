@@ -42,9 +42,16 @@ export default class RepliesController {
       .where('user_id', auth.user!.id)
       .where('reply_id', reply.id)
       .first()
-    if (existing) await existing.delete()
-    else if (reply.userId !== auth.user!.id)
-      await Like.create({ userId: auth.user!.id, replyId: reply.id })
+    if (existing) {
+      await existing.delete()
+    } else if (reply.userId !== auth.user!.id) {
+      try {
+        await Like.create({ userId: auth.user!.id, replyId: reply.id })
+      } catch (error) {
+        // Double click: the unique (user_id, reply_id) index already holds it.
+        if ((error as { code?: string }).code !== '23505') throw error
+      }
+    }
     return response.redirect().back()
   }
 }

@@ -6,7 +6,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import { writeThrottle } from '#start/limiter'
+import { actionThrottle, writeThrottle } from '#start/limiter'
 
 const ArticlesController = () => import('#controllers/articles_controller')
 const ArticleActionsController = () => import('#controllers/article_actions_controller')
@@ -22,18 +22,30 @@ router
     router
       .group(() => {
         router.get('articles/:slug/modifier', [ArticlesController, 'edit']).as('articles.edit')
-        router.put('articles/:slug', [ArticlesController, 'update']).as('articles.update')
-        router.delete('articles/:slug', [ArticlesController, 'destroy']).as('articles.destroy')
-        router.post('articles/:slug/like', [ArticleActionsController, 'like']).as('articles.like')
+        router
+          .put('articles/:slug', [ArticlesController, 'update'])
+          .as('articles.update')
+          .use(actionThrottle)
+        router
+          .delete('articles/:slug', [ArticlesController, 'destroy'])
+          .as('articles.destroy')
+          .use(actionThrottle)
+        router
+          .post('articles/:slug/like', [ArticleActionsController, 'like'])
+          .as('articles.like')
+          .use(actionThrottle)
         router
           .post('articles/:slug/publish', [ArticleActionsController, 'publish'])
           .as('articles.publish')
+          .use(actionThrottle)
         router
           .post('articles/:slug/unpublish', [ArticleActionsController, 'unpublish'])
           .as('articles.unpublish')
+          .use(actionThrottle)
         router
           .post('articles/:slug/feature', [ArticleActionsController, 'feature'])
           .as('articles.feature')
+          .use(actionThrottle)
         router
           .post('articles/:slug/comments', [ArticleCommentsController, 'store'])
           .as('articles.comments.store')

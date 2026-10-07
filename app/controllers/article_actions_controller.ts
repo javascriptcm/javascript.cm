@@ -57,7 +57,7 @@ export default class ArticleActionsController {
    */
   async publish({ params, auth, response, session }: HttpContext) {
     const { article, allowed } = await managedArticle(params.slug, auth.user!)
-    if (!allowed) {
+    if (!allowed || article.userId !== auth.user!.id) {
       session.flash('error', 'Seul l’auteur de cet article peut le publier.')
       return response.redirect().back()
     }

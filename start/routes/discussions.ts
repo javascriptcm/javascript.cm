@@ -9,7 +9,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import { writeThrottle } from '#start/limiter'
+import { actionThrottle, writeThrottle } from '#start/limiter'
 
 const DiscussionsController = () => import('#controllers/discussions_controller')
 const DiscussionActionsController = () => import('#controllers/discussion_actions_controller')
@@ -25,8 +25,14 @@ router
       .use(writeThrottle)
 
     router.get('discussions/:slug/modifier', [DiscussionsController, 'edit']).as('discussions.edit')
-    router.put('discussions/:slug', [DiscussionsController, 'update']).as('discussions.update')
-    router.delete('discussions/:slug', [DiscussionsController, 'destroy']).as('discussions.destroy')
+    router
+      .put('discussions/:slug', [DiscussionsController, 'update'])
+      .as('discussions.update')
+      .use(actionThrottle)
+    router
+      .delete('discussions/:slug', [DiscussionsController, 'destroy'])
+      .as('discussions.destroy')
+      .use(actionThrottle)
 
     router
       .post('discussions/:slug/replies', [DiscussionActionsController, 'reply'])
@@ -35,9 +41,11 @@ router
     router
       .post('discussions/:slug/pin', [DiscussionActionsController, 'togglePin'])
       .as('discussions.pin')
+      .use(actionThrottle)
     router
       .post('discussions/:slug/lock', [DiscussionActionsController, 'toggleLock'])
       .as('discussions.lock')
+      .use(actionThrottle)
   })
   .use(middleware.auth())
 

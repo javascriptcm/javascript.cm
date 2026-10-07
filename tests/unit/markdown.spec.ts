@@ -41,6 +41,30 @@ test.group('Markdown rendering', () => {
     assert.include(html, '+++')
   })
 
+  test('pathological input is rejected without blocking the server', async ({ assert }) => {
+    let ticks = 0
+    const interval = setInterval(() => ticks++, 100)
+    const started = Date.now()
+    await assert.rejects(() => renderMarkdown('*_'.repeat(29_000)), /trop complexe/)
+    clearInterval(interval)
+
+    const elapsed = Date.now() - started
+    assert.isBelow(elapsed, 8_000)
+    // The event loop kept running while the worker was busy.
+    assert.isAbove(ticks, Math.floor(elapsed / 100) - 10)
+
+    // The renderer recovers with a fresh worker.
+    assert.include(await renderMarkdown('**ok**'), '<strong>ok</strong>')
+  }).timeout(15_000)
+
+  test('excerpt helpers stay linear on hostile input', ({ assert }) => {
+    const started = Date.now()
+    plainExcerpt('['.repeat(100_000))
+    plainExcerpt('```\n'.repeat(30_000))
+    readingMinutes('```\n'.repeat(30_000))
+    assert.isBelow(Date.now() - started, 200)
+  })
+
   test('reading time and excerpt', ({ assert }) => {
     assert.equal(readingMinutes('mot '.repeat(10)), 1)
     assert.equal(readingMinutes('mot '.repeat(1100)), 5)
