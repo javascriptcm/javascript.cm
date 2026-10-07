@@ -43,4 +43,39 @@ export default class UserTransformer extends BaseTransformer<User> {
       isModerator: this.resource.isModerator,
     }
   }
+
+  /**
+   * Members directory row. Counters come from subqueries selected as
+   * "articles_count", "threads_count" and "replies_count".
+   */
+  forDirectory() {
+    return {
+      ...this.toObject(),
+      ...this.pick(this.resource, ['bio', 'location', 'createdAt']),
+      articlesCount: Number(this.resource.$extras.articles_count ?? 0),
+      threadsCount: Number(this.resource.$extras.threads_count ?? 0),
+      repliesCount: Number(this.resource.$extras.replies_count ?? 0),
+    }
+  }
+
+  /**
+   * Back-office row for moderators (no private contact data).
+   */
+  forModeration() {
+    return {
+      ...this.forDirectory(),
+      bannedAt: this.resource.bannedAt,
+      isBanned: this.resource.isBanned,
+    }
+  }
+
+  /**
+   * Back-office row for administrators: adds the e-mail address.
+   */
+  forAdmin() {
+    return {
+      ...this.forModeration(),
+      email: this.resource.email,
+    }
+  }
 }
