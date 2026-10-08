@@ -23,6 +23,15 @@ main() {
       cd "$dir"
       git fetch -q --prune origin "$branch"
       git checkout -q -B "$branch" "origin/$branch"
+      # Never let one environment take over another one's containers and
+      # volumes (e.g. an older docker-compose.yml with a fixed project name).
+      local expected="jscm 3333" actual
+      [[ "$target" == production ]] && expected="jscm-prod 3334"
+      actual="$(docker compose config --format json 2>/dev/null | python3 -c 'import json, sys; c = json.load(sys.stdin); print(c["name"], c["services"]["app"]["ports"][0]["published"])' || true)"
+      if [[ "$actual" != "$expected" ]]; then
+        echo "!! compose project/port is '${actual:-?}', expected '$expected': refusing to deploy $target" >&2
+        exit 4
+      fi
       exec ./deploy/deploy.sh "$branch"
       ;;
     preview)
