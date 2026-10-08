@@ -41,8 +41,12 @@ const shieldConfig = defineConfig({
     /**
      * Route patterns to exclude from CSRF checks.
      * Useful for external webhooks or API endpoints.
+     *
+     * "Sign in with Apple" posts its result cross-site from appleid.apple.com
+     * (response_mode=form_post): no CSRF token can be present. The callback
+     * is protected by the OAuth state stored in an encrypted cookie.
      */
-    exceptRoutes: [],
+    exceptRoutes: ['/auth/apple/callback'],
 
     /**
      * Expose an encrypted XSRF-TOKEN cookie for frontend HTTP clients.

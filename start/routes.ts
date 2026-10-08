@@ -17,7 +17,7 @@ import { actionThrottle, authThrottle, previewThrottle } from '#start/limiter'
 const HomeController = () => import('#controllers/home_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
 const RegisterController = () => import('#controllers/auth/register_controller')
-const GithubController = () => import('#controllers/auth/github_controller')
+const SocialController = () => import('#controllers/auth/social_controller')
 const MarkdownController = () => import('#controllers/markdown_controller')
 const SeoController = () => import('#controllers/seo_controller')
 const RepliesController = () => import('#controllers/replies_controller')
@@ -49,8 +49,23 @@ router
     router.post('login', [LoginController, 'store']).as('login.store').use(authThrottle)
     router.get('register', [RegisterController, 'show']).as('register')
     router.post('register', [RegisterController, 'store']).as('register.store').use(authThrottle)
-    router.get('auth/github', [GithubController, 'redirect']).as('auth.github')
-    router.get('auth/github/callback', [GithubController, 'callback']).as('auth.github.callback')
+
+    // Social sign-in. Unknown or unconfigured providers answer 404.
+    router
+      .get('auth/:provider', [SocialController, 'redirect'])
+      .where('provider', /^(github|google|apple)$/)
+      .as('auth.social')
+    router
+      .get('auth/:provider/callback', [SocialController, 'callback'])
+      .where('provider', /^(github|google)$/)
+      .as('auth.social.callback')
+      .use(authThrottle)
+    // Apple posts the result cross-site ("form_post"): excluded from CSRF in
+    // config/shield.ts, protected by the state cookie instead.
+    router
+      .post('auth/apple/callback', [SocialController, 'appleCallback'])
+      .as('auth.apple.callback')
+      .use(authThrottle)
   })
   .use(middleware.guest())
 

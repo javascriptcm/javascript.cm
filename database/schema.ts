@@ -291,8 +291,10 @@ export class ThreadSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['avatarUrl', 'bannedAt', 'bio', 'createdAt', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'id', 'linkedinUsername', 'location', 'name', 'password', 'role', 'sessionVersion', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
+  static $columns = ['appleId', 'avatarUrl', 'bannedAt', 'bio', 'createdAt', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'googleId', 'id', 'linkedinUsername', 'location', 'name', 'password', 'role', 'sessionVersion', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
   $columns = UserSchema.$columns
+  @column()
+  declare appleId: string | null
   @column()
   declare avatarUrl: string | null
   @column.dateTime()
@@ -309,6 +311,8 @@ export class UserSchema extends BaseModel {
   declare githubId: string | null
   @column()
   declare githubUsername: string | null
+  @column()
+  declare googleId: string | null
   @column({ isPrimary: true })
   declare id: number
   @column()

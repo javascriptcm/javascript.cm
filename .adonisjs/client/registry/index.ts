@@ -54,17 +54,23 @@ const routes = {
     tokens: [{"old":"/register","type":0,"val":"register","end":""}],
     types: placeholder as Registry['register.store']['types'],
   },
-  'auth.github': {
+  'auth.social': {
     methods: ["GET","HEAD"],
-    pattern: '/auth/github',
-    tokens: [{"old":"/auth/github","type":0,"val":"auth","end":""},{"old":"/auth/github","type":0,"val":"github","end":""}],
-    types: placeholder as Registry['auth.github']['types'],
+    pattern: '/auth/:provider',
+    tokens: [{"old":"/auth/:provider","type":0,"val":"auth","end":""},{"old":"/auth/:provider","type":1,"val":"provider","end":""}],
+    types: placeholder as Registry['auth.social']['types'],
   },
-  'auth.github.callback': {
+  'auth.social.callback': {
     methods: ["GET","HEAD"],
-    pattern: '/auth/github/callback',
-    tokens: [{"old":"/auth/github/callback","type":0,"val":"auth","end":""},{"old":"/auth/github/callback","type":0,"val":"github","end":""},{"old":"/auth/github/callback","type":0,"val":"callback","end":""}],
-    types: placeholder as Registry['auth.github.callback']['types'],
+    pattern: '/auth/:provider/callback',
+    tokens: [{"old":"/auth/:provider/callback","type":0,"val":"auth","end":""},{"old":"/auth/:provider/callback","type":1,"val":"provider","end":""},{"old":"/auth/:provider/callback","type":0,"val":"callback","end":""}],
+    types: placeholder as Registry['auth.social.callback']['types'],
+  },
+  'auth.apple.callback': {
+    methods: ["POST"],
+    pattern: '/auth/apple/callback',
+    tokens: [{"old":"/auth/apple/callback","type":0,"val":"auth","end":""},{"old":"/auth/apple/callback","type":0,"val":"apple","end":""},{"old":"/auth/apple/callback","type":0,"val":"callback","end":""}],
+    types: placeholder as Registry['auth.apple.callback']['types'],
   },
   'logout': {
     methods: ["POST"],

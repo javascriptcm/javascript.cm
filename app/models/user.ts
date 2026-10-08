@@ -50,7 +50,8 @@ export default class User extends compose(
   }
 
   get isBanned() {
-    return this.bannedAt !== null
+    // A freshly created model has bannedAt undefined, not null.
+    return this.bannedAt !== null && this.bannedAt !== undefined
   }
 
   /**

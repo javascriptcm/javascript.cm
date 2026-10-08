@@ -18,6 +18,7 @@ export const controllers = {
     Github: () => import('#controllers/auth/github_controller'),
     Login: () => import('#controllers/auth/login_controller'),
     Register: () => import('#controllers/auth/register_controller'),
+    Social: () => import('#controllers/auth/social_controller'),
   },
   Dashboard: () => import('#controllers/dashboard_controller'),
   DiscussionActions: () => import('#controllers/discussion_actions_controller'),

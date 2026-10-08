@@ -1,5 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react'
-import { useState, type KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Trash2 } from 'lucide-react'
 import DashboardLayout from '~/layouts/dashboard'
 import { Seo } from '~/components/seo'
@@ -9,13 +9,22 @@ import { WorkspaceHeader } from '~/components/dashboard/workspace-header'
 import { FormSection } from '~/components/settings/form-section'
 import { formatDate, plural } from '~/lib/format'
 
+type ProviderName = 'github' | 'google' | 'apple'
+
 type Props = {
-  githubLinked: boolean
+  linkedProviders: Record<ProviderName, boolean>
   content: { articles: number; threads: number; discussions: number; replies: number }
 }
 
-export default function SettingsAccount({ githubLinked, content }: Props) {
-  const user = usePage().props.user!
+const PROVIDER_LABELS: Record<ProviderName, string> = {
+  github: 'GitHub',
+  google: 'Google',
+  apple: 'Apple',
+}
+
+export default function SettingsAccount({ linkedProviders, content }: Props) {
+  const { user: sessionUser, features } = usePage().props
+  const user = sessionUser!
   const [open, setOpen] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
   const form = useForm({ confirmation: '' })
@@ -46,11 +55,27 @@ export default function SettingsAccount({ githubLinked, content }: Props) {
     }
   }
 
-  const facts = [
+  // Providers linked to the account, plus the ones available to link.
+  const providers = (Object.keys(PROVIDER_LABELS) as ProviderName[]).filter(
+    (name) => linkedProviders[name] || features?.[name]
+  )
+  const linkedLabels = providers
+    .filter((name) => linkedProviders[name])
+    .map((name) => PROVIDER_LABELS[name])
+
+  const facts: [string, ReactNode][] = [
     ['E-mail de connexion', user.email],
     ['Membre depuis le', formatDate(user.createdAt)],
-    ['Connexion GitHub', githubLinked ? 'Liée' : 'Non liée'],
-    ['Mot de passe', user.hasPassword ? 'Défini' : 'Aucun (connexion GitHub uniquement)'],
+    ...providers.map((name): [string, ReactNode] => [
+      `Connexion ${PROVIDER_LABELS[name]}`,
+      linkedProviders[name] ? 'Liée' : 'Non liée',
+    ]),
+    [
+      'Mot de passe',
+      user.hasPassword
+        ? 'Défini'
+        : `Aucun (connexion ${linkedLabels.length ? `avec ${linkedLabels.join(' ou ')}` : 'externe'} uniquement)`,
+    ],
   ]
 
   const losses = [

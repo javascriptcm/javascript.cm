@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
-import { githubEnabled } from '#config/ally'
+import { socialFeatures } from '#services/social/index'
 import env from '#start/env'
 import db from '@adonisjs/lucid/services/db'
 import { reportQueueCounts } from '#controllers/admin/reports_controller'
@@ -51,7 +51,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
         auth?.user ? UserTransformer.transform(auth.user).useVariant('forSession') : undefined
       ),
       preferences: ctx.inertia.always({ theme }),
-      features: ctx.inertia.always({ github: githubEnabled() }),
+      features: ctx.inertia.always(socialFeatures()),
       site: ctx.inertia.always({ url: env.get('APP_URL') }),
       unreadNotifications: ctx.inertia.always(unreadNotifications),
       reportQueueCount: ctx.inertia.always(reportQueueCount),

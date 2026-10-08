@@ -39,7 +39,22 @@ export default await Env.create(new URL('../', import.meta.url), {
   // Seed fictional demo content (members, articles, threads) when "true"
   SEED_DEMO: Env.schema.boolean.optional(),
 
-  // GitHub OAuth (optional: the "Continue with GitHub" button is hidden when unset)
+  // Social sign-in (all optional). A provider is enabled only when all its
+  // variables are set; otherwise its button is hidden and its routes 404.
+  // Callback URLs: ${APP_URL}/auth/<github|google|apple>/callback
+
+  // GitHub OAuth app
   GITHUB_CLIENT_ID: Env.schema.string.optional(),
   GITHUB_CLIENT_SECRET: Env.schema.string.optional(),
+
+  // Google (OpenID Connect, "Web application" OAuth client)
+  GOOGLE_CLIENT_ID: Env.schema.string.optional(),
+  GOOGLE_CLIENT_SECRET: Env.schema.string.optional(),
+
+  // Sign in with Apple: Services ID, Team ID, Key ID and the .p8 key (PEM,
+  // escaped "\n" accepted)
+  APPLE_CLIENT_ID: Env.schema.string.optional(),
+  APPLE_TEAM_ID: Env.schema.string.optional(),
+  APPLE_KEY_ID: Env.schema.string.optional(),
+  APPLE_PRIVATE_KEY: Env.schema.string.optional(),
 })

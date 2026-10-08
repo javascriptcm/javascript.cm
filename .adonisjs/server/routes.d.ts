@@ -12,8 +12,9 @@ export type ScannedRoutes = {
     'login.store': { paramsTuple?: []; params?: {} }
     'register': { paramsTuple?: []; params?: {} }
     'register.store': { paramsTuple?: []; params?: {} }
-    'auth.github': { paramsTuple?: []; params?: {} }
-    'auth.github.callback': { paramsTuple?: []; params?: {} }
+    'auth.social': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
+    'auth.social.callback': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
+    'auth.apple.callback': { paramsTuple?: []; params?: {} }
     'logout': { paramsTuple?: []; params?: {} }
     'markdown.preview': { paramsTuple?: []; params?: {} }
     'replies.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -96,8 +97,8 @@ export type ScannedRoutes = {
     'pages.code_of_conduct': { paramsTuple?: []; params?: {} }
     'login': { paramsTuple?: []; params?: {} }
     'register': { paramsTuple?: []; params?: {} }
-    'auth.github': { paramsTuple?: []; params?: {} }
-    'auth.github.callback': { paramsTuple?: []; params?: {} }
+    'auth.social': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
+    'auth.social.callback': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
     'seo.robots': { paramsTuple?: []; params?: {} }
     'seo.sitemap': { paramsTuple?: []; params?: {} }
     'seo.feed': { paramsTuple?: []; params?: {} }
@@ -135,8 +136,8 @@ export type ScannedRoutes = {
     'pages.code_of_conduct': { paramsTuple?: []; params?: {} }
     'login': { paramsTuple?: []; params?: {} }
     'register': { paramsTuple?: []; params?: {} }
-    'auth.github': { paramsTuple?: []; params?: {} }
-    'auth.github.callback': { paramsTuple?: []; params?: {} }
+    'auth.social': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
+    'auth.social.callback': { paramsTuple: [ParamValue]; params: {'provider': ParamValue} }
     'seo.robots': { paramsTuple?: []; params?: {} }
     'seo.sitemap': { paramsTuple?: []; params?: {} }
     'seo.feed': { paramsTuple?: []; params?: {} }
@@ -170,6 +171,7 @@ export type ScannedRoutes = {
   POST: {
     'login.store': { paramsTuple?: []; params?: {} }
     'register.store': { paramsTuple?: []; params?: {} }
+    'auth.apple.callback': { paramsTuple?: []; params?: {} }
     'logout': { paramsTuple?: []; params?: {} }
     'markdown.preview': { paramsTuple?: []; params?: {} }
     'replies.like': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

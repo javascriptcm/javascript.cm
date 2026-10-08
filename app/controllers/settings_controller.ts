@@ -128,7 +128,11 @@ export default class SettingsController {
       .then((result) => result.rows[0])
 
     return inertia.render('settings/account', {
-      githubLinked: user.githubId !== null,
+      linkedProviders: {
+        github: user.githubId !== null,
+        google: user.googleId !== null,
+        apple: user.appleId !== null,
+      },
       content: {
         articles: Number(counts.articles),
         threads: Number(counts.threads),

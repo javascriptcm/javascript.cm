@@ -15,8 +15,11 @@ export interface ApiDefinition {
     store: typeof routes['register.store']
   }
   auth: {
-    github: typeof routes['auth.github'] & {
-      callback: typeof routes['auth.github.callback']
+    social: typeof routes['auth.social'] & {
+      callback: typeof routes['auth.social.callback']
+    }
+    apple: {
+      callback: typeof routes['auth.apple.callback']
     }
   }
   logout: typeof routes['logout']

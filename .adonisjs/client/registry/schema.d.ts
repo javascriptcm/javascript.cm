@@ -103,28 +103,40 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/register_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'auth.github': {
+  'auth.social': {
     methods: ["GET","HEAD"]
-    pattern: '/auth/github'
+    pattern: '/auth/:provider'
     types: {
       body: {}
-      paramsTuple: []
-      params: {}
+      paramsTuple: [ParamValue]
+      params: { provider: ParamValue }
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/github_controller').default['redirect']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/github_controller').default['redirect']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['redirect']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['redirect']>>>
     }
   }
-  'auth.github.callback': {
+  'auth.social.callback': {
     methods: ["GET","HEAD"]
-    pattern: '/auth/github/callback'
+    pattern: '/auth/:provider/callback'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { provider: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['callback']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['callback']>>>
+    }
+  }
+  'auth.apple.callback': {
+    methods: ["POST"]
+    pattern: '/auth/apple/callback'
     types: {
       body: {}
       paramsTuple: []
       params: {}
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/github_controller').default['callback']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/github_controller').default['callback']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['appleCallback']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth/social_controller').default['appleCallback']>>>
     }
   }
   'logout': {

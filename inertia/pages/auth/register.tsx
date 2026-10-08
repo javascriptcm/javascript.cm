@@ -4,10 +4,11 @@ import AuthLayout from '~/layouts/auth'
 import { Seo } from '~/components/seo'
 import { Button } from '~/components/ui/button'
 import { Field, Input } from '~/components/ui/field'
-import { GithubButton } from '~/components/github-button'
+import { hasSocialProviders, SocialButtons } from '~/components/social-buttons'
 
 export default function Register() {
   const { features } = usePage().props
+  const showSocial = hasSocialProviders(features)
   const form = useForm({
     name: '',
     username: '',
@@ -35,9 +36,9 @@ export default function Register() {
         Un compte pour écrire, demander de l’aide et aider les autres.
       </p>
 
-      {features.github && (
+      {showSocial && (
         <>
-          <GithubButton className="mt-8" label="S’inscrire avec GitHub" />
+          <SocialButtons className="mt-8" />
           <div className="my-7 flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-line" />
             <span className="label">ou avec votre e-mail</span>
@@ -46,11 +47,7 @@ export default function Register() {
         </>
       )}
 
-      <form
-        onSubmit={submit}
-        className={features.github ? 'grid gap-5' : 'mt-8 grid gap-5'}
-        noValidate
-      >
+      <form onSubmit={submit} className={showSocial ? 'grid gap-5' : 'mt-8 grid gap-5'} noValidate>
         <Field label="Nom complet" htmlFor="name" error={form.errors.name}>
           <Input
             id="name"
