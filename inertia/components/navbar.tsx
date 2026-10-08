@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, usePage, router } from '@inertiajs/react'
 import {
+  Bell,
   LayoutDashboard,
+  Search,
   LogOut,
   Menu as MenuIcon,
   PenLine,
@@ -33,6 +35,7 @@ function isActive(url: string, href: string) {
 export default function Navbar() {
   const { url, props } = usePage()
   const user = props.user
+  const unread = props.unreadNotifications ?? 0
   const [open, setOpen] = useState(false)
   const [writeOpen, setWriteOpen] = useState(false)
 
@@ -77,7 +80,35 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <ThemeToggle />
+            <Link
+              href="/recherche"
+              aria-label="Rechercher"
+              title="Rechercher"
+              className={cn(
+                'grid size-10 place-items-center rounded-sm border border-transparent text-ink-2 transition-colors hover:border-line-2 hover:text-ink',
+                isActive(url, '/recherche') && 'border-line-2 text-ink'
+              )}
+            >
+              <Search size={18} strokeWidth={1.75} />
+            </Link>
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
+            {user && (
+              <Link
+                href="/notifications"
+                aria-label={unread ? `Notifications (${unread} non lues)` : 'Notifications'}
+                title="Notifications"
+                className="relative grid size-10 place-items-center rounded-sm border border-transparent text-ink-2 transition-colors hover:border-line-2 hover:text-ink"
+              >
+                <Bell size={18} strokeWidth={1.75} />
+                {unread > 0 && (
+                  <span className="absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-xs bg-js px-1 font-mono text-[10px] leading-none font-bold text-js-ink">
+                    {unread > 99 ? '99+' : unread}
+                  </span>
+                )}
+              </Link>
+            )}
             {user ? (
               <>
                 {/* Wrapper controls visibility: "hidden" on the button itself would
@@ -170,6 +201,10 @@ export default function Navbar() {
             ))}
           </ul>
           <div className="mt-10 grid gap-2">
+            <div className="mb-4 flex items-center justify-between border-y border-line py-3">
+              <span className="label">Thème</span>
+              <ThemeToggle />
+            </div>
             {user ? (
               <>
                 <ButtonLink href="/articles/nouveau" size="lg" block>

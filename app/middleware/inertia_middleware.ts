@@ -4,11 +4,12 @@ import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 import { githubEnabled } from '#config/ally'
 import env from '#start/env'
+import db from '@adonisjs/lucid/services/db'
 
 export type ThemePreference = 'light' | 'dark' | 'system'
 
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
-  share(ctx: HttpContext) {
+  async share(ctx: HttpContext) {
     /**
      * The share method is called everytime an Inertia page is rendered. In
      * certain cases, a page may get rendered before the session middleware
@@ -22,6 +23,16 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
     const cookie = request?.plainCookie('app_theme', { encoded: false })
     const theme: ThemePreference = cookie === 'light' || cookie === 'dark' ? cookie : 'system'
 
+    let unreadNotifications = 0
+    if (auth?.user) {
+      const [row] = await db
+        .from('notifications')
+        .where('user_id', auth.user.id)
+        .whereNull('read_at')
+        .count('* as total')
+      unreadNotifications = Number(row?.total ?? 0)
+    }
+
     /**
      * Data shared with all Inertia pages. Make sure you are using
      * transformers for rich data-types like Models.
@@ -34,6 +45,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       preferences: ctx.inertia.always({ theme }),
       features: ctx.inertia.always({ github: githubEnabled() }),
       site: ctx.inertia.always({ url: env.get('APP_URL') }),
+      unreadNotifications: ctx.inertia.always(unreadNotifications),
     }
   }
 

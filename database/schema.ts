@@ -123,6 +123,31 @@ export class LikeSchema extends BaseModel {
   declare userId: number
 }
 
+export class NotificationSchema extends BaseModel {
+  static $columns = ['actorId', 'articleId', 'createdAt', 'discussionId', 'id', 'readAt', 'replyId', 'threadId', 'type', 'userId'] as const
+  $columns = NotificationSchema.$columns
+  @column()
+  declare actorId: number | null
+  @column()
+  declare articleId: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare discussionId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare readAt: DateTime | null
+  @column()
+  declare replyId: number | null
+  @column()
+  declare threadId: number | null
+  @column()
+  declare type: 'thread_reply' | 'discussion_reply' | 'article_comment' | 'solution_accepted'
+  @column()
+  declare userId: number
+}
+
 export class RateLimitSchema extends BaseModel {
   static $columns = ['expire', 'key', 'points'] as const
   $columns = RateLimitSchema.$columns
@@ -172,6 +197,37 @@ export class ReplySchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare userId: number
+}
+
+export class ReportSchema extends BaseModel {
+  static $columns = ['articleId', 'createdAt', 'details', 'discussionId', 'id', 'reason', 'replyId', 'reporterId', 'resolvedAt', 'resolvedById', 'status', 'threadId', 'updatedAt'] as const
+  $columns = ReportSchema.$columns
+  @column()
+  declare articleId: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare details: string | null
+  @column()
+  declare discussionId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare reason: 'spam' | 'abuse' | 'off_topic' | 'other'
+  @column()
+  declare replyId: number | null
+  @column()
+  declare reporterId: number
+  @column.dateTime()
+  declare resolvedAt: DateTime | null
+  @column()
+  declare resolvedById: number | null
+  @column()
+  declare status: 'open' | 'resolved' | 'dismissed'
+  @column()
+  declare threadId: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class TagSchema extends BaseModel {
