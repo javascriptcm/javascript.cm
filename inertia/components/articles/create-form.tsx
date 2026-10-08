@@ -1,199 +1,387 @@
-import { FormEvent, useState, Suspense, lazy } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { useForm } from '@inertiajs/react'
-import { Switch } from '@headlessui/react'
-import SlideOver from '../slide-over'
+import type { Data } from '@generated/data'
+import { Button, ButtonLink } from '~/components/ui/button'
+import { MarkdownEditor } from '~/components/ui/markdown-editor'
+import { cn, formatNumber } from '~/lib/format'
 
-const MDEditor = lazy(() => import('@uiw/react-md-editor'))
-
-interface CreateArticleFormProps {
-  isOpen: boolean
-  onClose: () => void
+export const ARTICLE_LIMITS = {
+  titleMin: 10,
+  titleMax: 160,
+  excerptMax: 300,
+  bodyMin: 100,
+  tagsMax: 4,
 }
 
-export default function CreateArticleForm({ isOpen, onClose }: CreateArticleFormProps) {
-  const [isDraft, setIsDraft] = useState(true)
-  const { data, setData, post, processing, errors } = useForm({
-    title: '',
-    canonicalUrl: '',
-    content: '',
-    excerpt: '',
-    tags: [],
-    language: 'fr',
-    coverImage: null as File | null,
+type FormData = {
+  title: string
+  excerpt: string
+  coverUrl: string
+  tags: number[]
+  body: string
+}
+
+type Intent = 'publish' | 'draft'
+
+const FIELD_ORDER: (keyof FormData)[] = ['title', 'excerpt', 'body', 'tags', 'coverUrl']
+
+const control =
+  'w-full rounded-sm border border-line-2 bg-card text-ink placeholder:text-muted/80 transition-[border-color,box-shadow] duration-150 focus:border-ink focus:shadow-[0_0_0_3px_var(--js)] focus:outline-none aria-[invalid=true]:border-danger'
+
+/**
+ * "12 / 160" counter, red when outside the allowed range.
+ */
+function Counter({ value, min = 0, max }: { value: number; min?: number; max: number }) {
+  const off = value > max || (value > 0 && value < min)
+  return (
+    <span
+      className={cn(
+        'font-mono text-[12px] tabular-nums normal-case',
+        off ? 'text-danger' : 'text-muted'
+      )}
+      aria-hidden="true"
+    >
+      {formatNumber(value)} / {formatNumber(max)}
+    </span>
+  )
+}
+
+function FieldShell({
+  label,
+  htmlFor,
+  aside,
+  hint,
+  error,
+  optional,
+  children,
+}: {
+  label: ReactNode
+  htmlFor: string
+  aside?: ReactNode
+  hint?: ReactNode
+  error?: string
+  optional?: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between gap-4">
+        <label htmlFor={htmlFor} className="label text-ink-2">
+          {label}
+          {optional && (
+            <span className="ml-2 tracking-normal normal-case text-muted">facultatif</span>
+          )}
+        </label>
+        {aside}
+      </div>
+      {children}
+      {error ? (
+        <p id={`${htmlFor}-error`} className="text-[13.5px] font-medium text-danger" role="alert">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={`${htmlFor}-hint`} className="text-[13.5px] text-muted">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+function CoverPreview({ url }: { url: string }) {
+  const [failed, setFailed] = useState<string | null>(null)
+  if (!/^https:\/\/\S+\.\S+/.test(url)) return null
+  if (failed === url) {
+    return <p className="label text-danger">Impossible de charger cette image pour l’instant.</p>
+  }
+  return (
+    <img
+      src={url}
+      alt="Aperçu de l’image de couverture"
+      onError={() => setFailed(url)}
+      className="aspect-[2/1] w-full max-w-sm rounded-sm border border-line bg-paper-2 object-cover"
+    />
+  )
+}
+
+/**
+ * Shared create / edit form for articles. Two submit intents:
+ * publish (or keep published) and save as draft.
+ */
+export function ArticleForm({
+  article,
+  tags,
+  excerptIsAuto = false,
+}: {
+  article?: Data.Article.Variants['forEdit']
+  tags: Data.Tag[]
+  excerptIsAuto?: boolean
+}) {
+  const isEdit = Boolean(article)
+  const isPublished = Boolean(article?.isPublished)
+  const [intent, setIntent] = useState<Intent>('publish')
+
+  const form = useForm<FormData>({
+    title: article?.title ?? '',
+    excerpt: article && !excerptIsAuto ? (article.excerpt ?? '') : '',
+    coverUrl: article?.coverUrl ?? '',
+    tags: article?.tags?.map((tag) => tag.id) ?? [],
+    body: article?.body ?? '',
   })
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    post('/articles', {
-      onSuccess: () => onClose(),
-    })
+  const bodyLength = form.data.body.trim().length
+  const minutes = Math.max(1, Math.round(form.data.body.split(/\s+/).filter(Boolean).length / 220))
+  const tagsFull = form.data.tags.length >= ARTICLE_LIMITS.tagsMax
+  const tagError =
+    (form.errors as Record<string, string | undefined>)['tags'] ??
+    Object.entries(form.errors).find(([key]) => key.startsWith('tags.'))?.[1]
+
+  function toggleTag(id: number) {
+    const selected = form.data.tags.includes(id)
+    if (!selected && tagsFull) return
+    form.setData(
+      'tags',
+      selected ? form.data.tags.filter((tagId) => tagId !== id) : [...form.data.tags, id]
+    )
   }
 
+  function submit(next: Intent, event?: FormEvent) {
+    event?.preventDefault()
+    setIntent(next)
+    form.transform((data) => ({ ...data, publish: next === 'publish' }))
+    const options = {
+      // Stay in place to show validation errors; start at the top of the article on success.
+      preserveScroll: 'errors' as const,
+      onError: (errors: Record<string, string>) => {
+        const first = FIELD_ORDER.find((key) =>
+          Object.keys(errors).some((e) => e === key || e.startsWith(`${key}.`))
+        )
+        if (first) document.getElementById(first === 'tags' ? 'tags-legend' : first)?.focus()
+      },
+    }
+    if (article) form.put(`/articles/${article.slug}`, options)
+    else form.post('/articles', options)
+  }
+
+  const primaryLabel = isPublished ? 'Enregistrer les modifications' : 'Publier l’article'
+  const busyLabel = intent === 'publish' && !isPublished ? 'Publication…' : 'Enregistrement…'
+
   return (
-    <SlideOver isOpen={isOpen} onClose={onClose} title="Rédiger un article">
-      <div className="space-y-6">
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                Soumettez votre article au site JavaScript.cm. Nous recherchons des articles de
-                haute qualité autour de JavaScript, Node.js, React, Next.js, Nest.js, AdonisJS,
-                Angular, Vue, CSS et autres sujets connexes. Les articles ne peuvent pas être de
-                nature promotionnelle et doivent être éducatifs et informatifs.
-              </p>
-            </div>
-          </div>
+    <form onSubmit={(event) => submit('publish', event)} noValidate className="grid gap-9">
+      <FieldShell
+        label="Titre"
+        htmlFor="title"
+        aside={
+          <Counter
+            value={form.data.title.trim().length}
+            min={ARTICLE_LIMITS.titleMin}
+            max={ARTICLE_LIMITS.titleMax}
+          />
+        }
+        hint="Explicite et précis : le lecteur doit savoir ce qu’il va apprendre (10 à 160 caractères)."
+        error={form.errors.title}
+      >
+        <textarea
+          id="title"
+          name="title"
+          rows={2}
+          value={form.data.title}
+          onChange={(e) => form.setData('title', e.target.value.replace(/\n/g, ' '))}
+          onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+          placeholder="Ex. : Accepter les paiements Mobile Money dans une app Node.js"
+          maxLength={ARTICLE_LIMITS.titleMax + 40}
+          aria-invalid={form.errors.title ? true : undefined}
+          aria-describedby={form.errors.title ? 'title-error' : 'title-hint'}
+          className={cn(
+            control,
+            'block min-h-[3.4rem] resize-none px-4 py-3 text-[clamp(1.35rem,2.6vw,1.8rem)] leading-[1.2] font-bold tracking-[-0.03em] [field-sizing:content]'
+          )}
+        />
+      </FieldShell>
+
+      <FieldShell
+        label="Chapô"
+        htmlFor="excerpt"
+        optional
+        aside={<Counter value={form.data.excerpt.trim().length} max={ARTICLE_LIMITS.excerptMax} />}
+        hint="Deux phrases qui donnent envie de lire. Laissé vide, il sera tiré du début de l’article."
+        error={form.errors.excerpt}
+      >
+        <textarea
+          id="excerpt"
+          name="excerpt"
+          rows={3}
+          value={form.data.excerpt}
+          onChange={(e) => form.setData('excerpt', e.target.value)}
+          placeholder="De quoi parle l’article, et pour qui ?"
+          aria-invalid={form.errors.excerpt ? true : undefined}
+          aria-describedby={form.errors.excerpt ? 'excerpt-error' : 'excerpt-hint'}
+          className={cn(control, 'block resize-y px-3.5 py-3 text-[16px] leading-relaxed')}
+        />
+      </FieldShell>
+
+      <FieldShell
+        label="Contenu"
+        htmlFor="body"
+        aside={
+          <span
+            className={cn(
+              'font-mono text-[12px] tabular-nums',
+              bodyLength > 0 && bodyLength < ARTICLE_LIMITS.bodyMin ? 'text-danger' : 'text-muted'
+            )}
+          >
+            {formatNumber(bodyLength)} car. · ~{minutes} min
+          </span>
+        }
+        hint={`Markdown : intertitres ##, blocs de code \`\`\`js, liens, listes. ${ARTICLE_LIMITS.bodyMin} caractères minimum.`}
+        error={form.errors.body}
+      >
+        <MarkdownEditor
+          id="body"
+          value={form.data.body}
+          onChange={(value) => form.setData('body', value)}
+          error={form.errors.body}
+          rows={20}
+          placeholder={
+            '## Le contexte\n\nExpliquez le problème de départ…\n\n```js\n// puis le code, commenté\n```'
+          }
+        />
+      </FieldShell>
+
+      <fieldset aria-describedby={tagError ? 'tags-error' : 'tags-hint'}>
+        <legend
+          id="tags-legend"
+          tabIndex={-1}
+          className="label float-left mb-2 flex w-full items-baseline justify-between gap-4 text-ink-2 focus:outline-none"
+        >
+          <span>Tags</span>
+          <span
+            className={cn(
+              'font-mono text-[12px] tracking-normal tabular-nums',
+              tagsFull ? 'text-ink' : 'text-muted'
+            )}
+          >
+            <span className="sr-only">sélectionnés : </span>
+            {form.data.tags.length} / {ARTICLE_LIMITS.tagsMax}
+          </span>
+        </legend>
+        <ul className="clear-both flex flex-wrap gap-1.5">
+          {tags.map((tag) => {
+            const selected = form.data.tags.includes(tag.id)
+            const disabled = !selected && tagsFull
+            return (
+              <li key={tag.id}>
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={disabled}
+                  onClick={() => toggleTag(tag.id)}
+                  className={cn(
+                    'inline-flex h-8 items-center rounded-sm border px-2.5 font-mono text-[12.5px] font-medium transition-colors duration-150 focus-visible:shadow-[0_0_0_3px_var(--js)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40',
+                    selected
+                      ? 'border-ink bg-js text-js-ink'
+                      : 'border-line-2 text-ink-2 hover:border-ink hover:text-ink'
+                  )}
+                >
+                  <span className="opacity-50" aria-hidden="true">
+                    #
+                  </span>
+                  {tag.name}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        {tagError ? (
+          <p id="tags-error" className="mt-3 text-[13.5px] font-medium text-danger" role="alert">
+            {tagError}
+          </p>
+        ) : (
+          <p id="tags-hint" className="mt-3 text-[13.5px] text-muted">
+            Jusqu’à {ARTICLE_LIMITS.tagsMax} sujets, pour que les bons lecteurs trouvent votre
+            article.
+          </p>
+        )}
+      </fieldset>
+
+      <FieldShell
+        label="Image de couverture"
+        htmlFor="coverUrl"
+        optional
+        hint="Adresse https:// d’une image au format paysage (idéalement 1600 × 800). Elle sert aussi d’aperçu sur les réseaux."
+        error={form.errors.coverUrl}
+      >
+        <input
+          id="coverUrl"
+          name="coverUrl"
+          type="url"
+          inputMode="url"
+          autoComplete="off"
+          spellCheck={false}
+          value={form.data.coverUrl}
+          onChange={(e) => form.setData('coverUrl', e.target.value)}
+          placeholder="https://"
+          aria-invalid={form.errors.coverUrl ? true : undefined}
+          aria-describedby={form.errors.coverUrl ? 'coverUrl-error' : 'coverUrl-hint'}
+          className={cn(control, 'h-11 px-3.5 font-mono text-[14px]')}
+        />
+        <CoverPreview url={form.data.coverUrl.trim()} />
+      </FieldShell>
+
+      <div className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-3 border-t border-ink bg-paper px-4 py-3 sm:mx-0 sm:px-0 sm:py-4">
+        <p className="label hidden sm:block" aria-live="polite">
+          {form.isDirty
+            ? 'Modifications non enregistrées'
+            : isPublished
+              ? 'Publié'
+              : isEdit
+                ? 'Brouillon'
+                : 'Nouvel article'}
+        </p>
+        <div className="flex w-full gap-2 sm:w-auto">
+          {isPublished ? (
+            <ButtonLink
+              href={`/articles/${article!.slug}`}
+              variant="ghost"
+              className="flex-1 sm:flex-none"
+            >
+              Annuler
+            </ButtonLink>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={() => submit('draft')}
+              loading={form.processing && intent === 'draft'}
+              disabled={form.processing}
+              className="flex-1 sm:flex-none"
+            >
+              {form.processing && intent === 'draft' ? (
+                'Enregistrement…'
+              ) : (
+                <>
+                  <span className="sm:hidden">Brouillon</span>
+                  <span className="hidden sm:inline">Enregistrer le brouillon</span>
+                </>
+              )}
+            </Button>
+          )}
+          <Button
+            type="submit"
+            loading={form.processing && intent === 'publish'}
+            disabled={form.processing}
+            className="flex-1 sm:flex-none"
+          >
+            {form.processing && intent === 'publish' ? (
+              busyLabel
+            ) : (
+              <>
+                <span className="sm:hidden">{isPublished ? 'Enregistrer' : 'Publier'}</span>
+                <span className="hidden sm:inline">{primaryLabel}</span>
+              </>
+            )}
+          </Button>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                Titre<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                id="title"
-                value={data.title}
-                onChange={(e) => setData('title', e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="language" className="block text-sm font-medium text-gray-700">
-                Langue<span className="text-red-500">*</span>
-              </label>
-              <div className="mt-1 flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setData('language', 'en')}
-                  className={`px-3 py-1 rounded-md ${
-                    data.language === 'en'
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                  }`}
-                >
-                  En
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setData('language', 'fr')}
-                  className={`px-3 py-1 rounded-md ${
-                    data.language === 'fr'
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                  }`}
-                >
-                  Fr
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700">
-              Excerpt<span className="text-red-500">*</span>
-              <span className="ml-1 text-xs text-gray-500">(minimum 50 caractères)</span>
-            </label>
-            <textarea
-              id="excerpt"
-              rows={3}
-              value={data.excerpt}
-              onChange={(e) => setData('excerpt', e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                data.excerpt.length > 0 && data.excerpt.length < 50
-                  ? 'border-yellow-300'
-                  : 'border-gray-300'
-              } px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm`}
-            />
-            <div className="mt-1 flex justify-between">
-              <span
-                className={`text-xs ${data.excerpt.length < 50 ? 'text-yellow-600' : 'text-green-600'}`}
-              >
-                {data.excerpt.length} / 50 caractères minimum
-              </span>
-              {errors.excerpt && <p className="text-sm text-red-600">{errors.excerpt}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-              Contenu<span className="text-red-500">*</span>
-              <span className="ml-1 text-xs text-gray-500">(minimum 100 caractères)</span>
-            </label>
-            <div className="mt-1" data-color-mode="light">
-              <Suspense>
-                <MDEditor
-                  value={data.content}
-                  onChange={(value) => setData('content', value || '')}
-                  preview="edit"
-                  height={400}
-                />
-              </Suspense>
-              <div className="mt-1 flex justify-between">
-                <span
-                  className={`text-xs ${data.content.length < 100 ? 'text-yellow-600' : 'text-green-600'}`}
-                >
-                  {data.content.length} / 100 caractères minimum
-                </span>
-                {errors.content && <p className="text-sm text-red-600">{errors.content}</p>}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Switch.Group>
-              <div className="flex items-center">
-                <Switch
-                  checked={!isDraft}
-                  onChange={() => setIsDraft(!isDraft)}
-                  className={`${
-                    !isDraft ? 'bg-indigo-600' : 'bg-gray-200'
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      !isDraft ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-                <Switch.Label className="ml-3 text-sm text-gray-600">
-                  {isDraft ? 'Brouillon' : 'Prêt à publier'}
-                </Switch.Label>
-              </div>
-            </Switch.Group>
-
-            <div className="flex gap-x-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-md bg-white py-2 px-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={processing}
-                className="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                {isDraft ? 'Sauvegarder comme brouillon' : 'Publier'}
-              </button>
-            </div>
-          </div>
-        </form>
       </div>
-    </SlideOver>
+    </form>
   )
 }

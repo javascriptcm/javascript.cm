@@ -1,112 +1,160 @@
 import { Link } from '@inertiajs/react'
+import { Heart, MessageSquare } from 'lucide-react'
+import type { Data } from '@generated/data'
+import { Avatar } from '~/components/ui/avatar'
+import { Tag } from '~/components/ui/tag'
+import { TimeAgo } from '~/components/ui/time-ago'
+import { cn, formatShortDate } from '~/lib/format'
 
-interface Article {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  author: {
-    name: string
-    username: string
-  }
-  publishedAt: string
-}
+type Article = Data.Article
 
-interface ArticlesListProps {
-  articles: {
-    data: Article[]
-    meta: {
-      total: number
-      per_page: number
-      current_page: number
-      last_page: number
-    }
-  }
-}
-
-export default function ArticlesList({ articles }: ArticlesListProps) {
+function Byline({
+  article,
+  className,
+  showStats = false,
+}: {
+  article: Article
+  className?: string
+  showStats?: boolean
+}) {
   return (
-    <div className="mt-8 space-y-8">
-      {articles.data.map((article) => (
-        <article key={article.id} className="bg-white p-8 rounded-lg shadow-sm">
-          <div className="flex items-center gap-x-4 text-xs">
-            <time dateTime={article.publishedAt} className="text-gray-500">
-              {new Date(article.publishedAt).toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </time>
-          </div>
-          <div className="group">
-            <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-              <Link href={`/articles/${article.slug}`}>
-                {/* <span className="absolute inset-0" /> */}
-                {article.title}
-              </Link>
-            </h3>
-            <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{article.excerpt}</p>
-          </div>
-          <div className="mt-6 flex items-center gap-x-4">
-            <div className="flex items-center gap-x-4">
-              <img
-                src={`https://ui-avatars.com/api/?name=${article.author.name}`}
-                alt=""
-                className="h-10 w-10 rounded-full bg-gray-100"
-              />
-              <div className="text-sm leading-6">
-                <p className="font-semibold text-gray-900">
-                  <Link href={`/@${article.author.username}`}>
-                    {/* <span className="absolute inset-0" /> */}
-                    {article.author.name}
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </div>
-        </article>
-      ))}
-
-      {/* Pagination */}
-      {articles.meta.last_page > 1 && (
-        <nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-8 pt-8">
-          <div className="-mt-px flex w-0 flex-1">
-            {articles.meta.current_page > 1 && (
-              <Link
-                href={`/articles?page=${articles.meta.current_page - 1}`}
-                className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              >
-                <span>Previous</span>
-              </Link>
-            )}
-          </div>
-          <div className="hidden md:-mt-px md:flex">
-            {[...Array(articles.meta.last_page)].map((_, i) => (
-              <Link
-                key={i}
-                href={`/articles?page=${i + 1}`}
-                className={`inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium ${
-                  articles.meta.current_page === i + 1
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`}
-              >
-                {i + 1}
-              </Link>
-            ))}
-          </div>
-          <div className="-mt-px flex w-0 flex-1 justify-end">
-            {articles.meta.current_page < articles.meta.last_page && (
-              <Link
-                href={`/articles?page=${articles.meta.current_page + 1}`}
-                className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              >
-                <span>Next</span>
-              </Link>
-            )}
-          </div>
-        </nav>
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[14px] text-muted',
+        className
       )}
+    >
+      {article.author && (
+        <Link
+          href={`/@${article.author.username}`}
+          className="inline-flex items-center gap-2 text-ink-2 hover:text-ink"
+        >
+          <Avatar user={article.author} size="xs" />
+          <span className="font-medium">{article.author.displayName}</span>
+        </Link>
+      )}
+      <span aria-hidden="true">·</span>
+      <TimeAgo date={article.publishedAt ?? article.createdAt} />
+      <span aria-hidden="true">·</span>
+      <span>{article.readingMinutes} min de lecture</span>
+      {showStats && (
+        <>
+          <span aria-hidden="true">·</span>
+          <span className="inline-flex items-center gap-3 font-mono text-[12.5px] tabular-nums">
+            <span className="inline-flex items-center gap-1" title="J’aime">
+              <Heart size={13} strokeWidth={1.75} aria-hidden="true" />
+              <span className="sr-only">J’aime :</span> {article.likesCount}
+            </span>
+            <span className="inline-flex items-center gap-1" title="Commentaires">
+              <MessageSquare size={13} strokeWidth={1.75} aria-hidden="true" />
+              <span className="sr-only">Commentaires :</span> {article.commentsCount}
+            </span>
+          </span>
+        </>
+      )}
+    </div>
+  )
+}
+
+/**
+ * The lead story: large title, excerpt, tags.
+ */
+export function ArticleFeature({
+  article,
+  showStats = false,
+}: {
+  article: Article
+  showStats?: boolean
+}) {
+  return (
+    <article className="group relative flex h-full flex-col">
+      {article.tags && article.tags.length > 0 && (
+        <div className="mb-5 flex flex-wrap gap-1.5">
+          {article.tags.slice(0, 3).map((tag) => (
+            <Tag key={tag.id} name={tag.name} href={`/articles?tag=${tag.slug}`} />
+          ))}
+        </div>
+      )}
+      <h3 className="text-[clamp(1.9rem,3.6vw,3rem)] leading-[1.02] font-bold tracking-[-0.035em]">
+        <Link
+          href={`/articles/${article.slug}`}
+          className="decoration-js decoration-[0.14em] underline-offset-[0.12em] group-hover:underline"
+        >
+          {article.title}
+        </Link>
+      </h3>
+      {article.excerpt && (
+        <p className="mt-5 max-w-2xl text-[17.5px] leading-relaxed text-ink-2">{article.excerpt}</p>
+      )}
+      <Byline article={article} className="mt-auto pt-8" showStats={showStats} />
+    </article>
+  )
+}
+
+/**
+ * Dense row with an index number, for lists and the home page.
+ */
+export function ArticleRow({
+  article,
+  index,
+  showExcerpt = true,
+  showStats = false,
+}: {
+  article: Article
+  index?: number
+  showExcerpt?: boolean
+  showStats?: boolean
+}) {
+  return (
+    <article className="group grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 border-t border-line py-6 first:border-t-0">
+      <span className={cn('label pt-1.5 tabular-nums', index === undefined && 'min-w-[4.25rem]')}>
+        {index !== undefined
+          ? String(index).padStart(2, '0')
+          : formatShortDate(article.publishedAt ?? article.createdAt)}
+      </span>
+      <div className="min-w-0">
+        <h3 className="text-[21px] leading-[1.18] font-semibold tracking-[-0.02em]">
+          <Link
+            href={`/articles/${article.slug}`}
+            className="decoration-js decoration-2 underline-offset-4 group-hover:underline"
+          >
+            {article.title}
+          </Link>
+        </h3>
+        {showExcerpt && article.excerpt && (
+          <p className="mt-2 line-clamp-2 text-[15.5px] text-ink-2">{article.excerpt}</p>
+        )}
+        <Byline article={article} className="mt-3" showStats={showStats} />
+      </div>
+    </article>
+  )
+}
+
+export function ArticleList({
+  articles,
+  numbered = false,
+  startAt = 1,
+  showExcerpt = true,
+  showStats = false,
+}: {
+  articles: Article[]
+  numbered?: boolean
+  /** First number when `numbered` (e.g. 16 on page 2). */
+  startAt?: number
+  showExcerpt?: boolean
+  showStats?: boolean
+}) {
+  return (
+    <div>
+      {articles.map((article, i) => (
+        <ArticleRow
+          key={article.id}
+          article={article}
+          index={numbered ? startAt + i : undefined}
+          showExcerpt={showExcerpt}
+          showStats={showStats}
+        />
+      ))}
     </div>
   )
 }

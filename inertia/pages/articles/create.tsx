@@ -1,99 +1,36 @@
-import { Head, useForm } from '@inertiajs/react'
-import { FormEvent } from 'react'
-import Navbar from '../../components/navbar'
-import Footer from '../../components/footer'
+import type { Data } from '@generated/data'
+import { Seo } from '~/components/seo'
+import { PageHeader } from '~/components/ui/page-header'
+import { ArticleForm } from '~/components/articles/create-form'
+import { WritingGuide } from '~/components/articles/writing-guide'
 
-export default function ArticleCreate() {
-  const { data, setData, post, processing, errors } = useForm({
-    title: '',
-    content: '',
-    excerpt: '',
-    tags: [],
-    published: false,
-  })
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    post('/articles')
-  }
-
+export default function ArticleCreate({ tags }: { tags: Data.Tag[] }) {
   return (
     <>
-      <Head title="Create Article - JavaScript Cameroun" />
-      <Navbar />
-
-      <div className="py-10">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={data.title}
-                onChange={(e) => setData('title', e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700">
-                Excerpt
-              </label>
-              <textarea
-                id="excerpt"
-                rows={3}
-                value={data.excerpt}
-                onChange={(e) => setData('excerpt', e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              />
-              {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                Content
-              </label>
-              <textarea
-                id="content"
-                rows={10}
-                value={data.content}
-                onChange={(e) => setData('content', e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-              />
-              {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="published"
-                type="checkbox"
-                checked={data.published}
-                onChange={(e) => setData('published', e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label htmlFor="published" className="ml-2 block text-sm text-gray-900">
-                Publish immediately
-              </label>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={processing}
-                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                {processing ? 'Saving...' : 'Save Article'}
-              </button>
-            </div>
-          </form>
+      <Seo title="Écrire un article" noindex />
+      <PageHeader
+        kicker={
+          <>
+            <span className="text-muted">[ART]</span> Articles / Nouveau
+          </>
+        }
+        title={
+          <>
+            Écrire un <span className="mark">article</span>.
+          </>
+        }
+        lead="Un tutoriel, un retour d’expérience, une astuce de production : partagez ce que vous avez appris. Écrivez en Markdown, enregistrez un brouillon, publiez quand c’est prêt."
+      />
+      <div className="shell grid gap-14 pt-10 pb-20 lg:grid-cols-12 lg:gap-12">
+        <div className="min-w-0 lg:col-span-8">
+          <ArticleForm tags={tags} />
         </div>
+        <aside className="lg:col-span-4">
+          <div className="lg:sticky lg:top-24">
+            <WritingGuide />
+          </div>
+        </aside>
       </div>
-
-      <Footer />
     </>
   )
 }

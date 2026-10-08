@@ -1,49 +1,99 @@
+import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/shield'
 
 const shieldConfig = defineConfig({
   /**
    * Configure CSP policies for your app. Refer documentation
-   * to learn more
+   * to learn more.
    */
   csp: {
-    enabled: false,
-    directives: {},
+    /**
+     * Enabled in production only: Vite's dev server relies on inline scripts.
+     */
+    enabled: app.inProduction,
+    directives: {
+      defaultSrc: [`'self'`],
+      scriptSrc: [`'self'`, '@nonce'],
+      // Shiki (code highlighting) and a few components use inline styles.
+      styleSrc: [`'self'`, `'unsafe-inline'`],
+      // Avatars and article covers may be hosted anywhere over HTTPS.
+      imgSrc: [`'self'`, 'data:', 'https:'],
+      fontSrc: [`'self'`, 'data:'],
+      connectSrc: [`'self'`],
+      objectSrc: [`'none'`],
+      baseUri: [`'self'`],
+      formAction: [`'self'`],
+      frameAncestors: [`'none'`],
+    },
     reportOnly: false,
   },
 
   /**
    * Configure CSRF protection options. Refer documentation
-   * to learn more
+   * to learn more.
    */
   csrf: {
+    /**
+     * Enable CSRF token verification for state-changing requests.
+     */
     enabled: true,
+
+    /**
+     * Route patterns to exclude from CSRF checks.
+     * Useful for external webhooks or API endpoints.
+     */
     exceptRoutes: [],
+
+    /**
+     * Expose an encrypted XSRF-TOKEN cookie for frontend HTTP clients.
+     */
     enableXsrfCookie: true,
+
+    /**
+     * HTTP methods protected by CSRF validation.
+     */
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
   },
 
   /**
    * Control how your website should be embedded inside
-   * iFrames
+   * iframes.
    */
   xFrame: {
+    /**
+     * Enable the X-Frame-Options header.
+     */
     enabled: true,
+
+    /**
+     * Block all framing attempts. Default value is DENY.
+     */
     action: 'DENY',
   },
 
   /**
-   * Force browser to always use HTTPS
+   * Force browser to always use HTTPS.
    */
   hsts: {
+    /**
+     * Enable the Strict-Transport-Security header.
+     */
     enabled: true,
+
+    /**
+     * HSTS policy duration remembered by browsers.
+     */
     maxAge: '180 days',
   },
 
   /**
-   * Disable browsers from sniffing the content type of a
-   * response and always rely on the "content-type" header.
+   * Disable browsers from sniffing content types and rely only
+   * on the response content-type header.
    */
   contentTypeSniffing: {
+    /**
+     * Enable X-Content-Type-Options: nosniff.
+     */
     enabled: true,
   },
 })

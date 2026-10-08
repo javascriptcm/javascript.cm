@@ -1,96 +1,94 @@
-# JavaScript.cm
+# javascript.cm
 
-This repository contains the source code for the [javascript.cm](https://javascript.cm) website ( javascript community in Cameroon ), inspired by [laravel.cm](https://laravel.cm). Laravel Cameroon is the largest community of PHP & Laravel developers residing in Cameroon.
+Le site de **JavaScript Cameroun**, la communauté des développeurs JavaScript du 237 : articles, forum d’entraide (questions / solutions acceptées), discussions, profils et annuaire des membres.
 
-## Server Requirements
+Staging : <https://staging.javascript.cm>
 
-The following dependencies are required to start the installation:
+## Stack
 
-- Node.js >= 22.0.0
-- npm or yarn
-- PostgreSQL or MySQL
+| Couche          | Outils                                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------- |
+| Backend         | [AdonisJS 7](https://adonisjs.com) (TypeScript), Lucid ORM, VineJS, sessions + remember-me, rate limiting      |
+| Frontend        | [Inertia 3](https://inertiajs.com) + React 19 (rendu serveur / SSR), [Tailwind CSS 4](https://tailwindcss.com) |
+| Base de données | PostgreSQL 18                                                                                                  |
+| Contenu         | Markdown (GFM) rendu côté serveur, nettoyé (`rehype-sanitize`) et coloré par [Shiki](https://shiki.style)      |
+| Déploiement     | Docker Compose derrière [Caddy](https://caddyserver.com) (HTTPS automatique)                                   |
 
-## Installation
+## Démarrer en local
 
-1. Clone this repo:
-
-```bash
-git clone https://github.com/bleriotnoguia/javascript.cm.git
-```
-
-2. Install dependencies:
+Prérequis : **Node.js ≥ 24**, Docker (ou un PostgreSQL local).
 
 ```bash
+git clone https://github.com/javascriptcm/javascript.cm.git
+cd javascript.cm
 npm install
-```
 
-or
+# PostgreSQL de développement
+docker run -d --name jscm-pg -p 5455:5432 \
+  -e POSTGRES_USER=jscm -e POSTGRES_PASSWORD=jscm -e POSTGRES_DB=jscm postgres:18-alpine
 
-```bash
-yarn install
-```
-
-3. Configure your database in `.env`:
-
-```env
-DB_CONNECTION=mysql
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=
-MYSQL_DB_NAME=javascript_cm
-```
-
-4. Run migrations:
-
-```bash
+cp .env.example .env          # puis DB_PORT=5455
+node ace generate:key         # remplit APP_KEY
 node ace migration:run
+node ace db:seed              # canaux, tags + contenu de démonstration en développement
+npm run dev                   # http://localhost:3333
 ```
 
-5. Start the development server:
+Donner un rôle à un membre : `node ace user:promote <pseudo|email> --role=admin|moderator|member`.
 
-```bash
-node ace serve --watch
+### Connexion GitHub (optionnelle)
+
+Créez une OAuth App sur <https://github.com/settings/developers> avec comme callback `${APP_URL}/auth/github/callback`, puis renseignez `GITHUB_CLIENT_ID` et `GITHUB_CLIENT_SECRET`. Sans ces variables, le bouton « Continuer avec GitHub » est simplement masqué.
+
+## Commandes utiles
+
+| Commande                 | Rôle                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `npm run dev`            | Serveur de développement (HMR)                                                   |
+| `npm run typecheck`      | Vérification TypeScript (backend + frontend)                                     |
+| `node ace test`          | Tests (Japa)                                                                     |
+| `node ace build`         | Build de production dans `build/`                                                |
+| `node ace codegen`       | Régénère les types partagés (`.adonisjs/`)                                       |
+| `node ace migration:run` | Applique les migrations (le schéma TypeScript `database/schema.ts` est régénéré) |
+
+## Organisation du code
+
+```
+app/
+  controllers/      contrôleurs HTTP (auth, articles, forum, discussions, membres, admin…)
+  models/           modèles Lucid (étendent les classes générées dans database/schema.ts)
+  transformers/     sérialisation typée vers Inertia (types Data.* côté React)
+  services/         markdown, slugs, réponses, OAuth GitHub…
+  validators/       schémas VineJS (messages en français : start/validator.ts)
+inertia/
+  pages/            une page React par écran
+  components/ui/    design system (boutons, champs, menus, éditeur Markdown…)
+  css/app.css       tokens de design (clair / sombre) et utilitaires
+start/routes/       routes par domaine (articles, forum, discussions, membres, admin)
+deploy/             Caddyfile et script de déploiement
 ```
 
-## Features
+### Design
 
-- [x] User Authentication
-- [x] GitHub Authentication
-- [ ] Twitter Integration
-- [ ] Article Management
-- [ ] Forum
-- [ ] Discussions
-- [ ] Admin Dashboard
-- [ ] Telegram Notifications
+Direction artistique : _un journal technique imprimé de la scène JavaScript camerounaise_. Papier chaud et encre carbone, le jaune JavaScript comme unique signal (surligneur, survols, focus), filets fins, Bricolage Grotesque + JetBrains Mono, thèmes clair et sombre. Toutes les couleurs passent par les tokens de `inertia/css/app.css`.
 
-## Available Commands
+## Déploiement
 
-| Command                       | Description              |
-| ----------------------------- | ------------------------ |
-| `node ace serve --watch`      | Start development server |
-| `node ace build`              | Build for production     |
-| `node ace test`               | Run tests                |
-| `node ace migration:run`      | Run database migrations  |
-| `node ace migration:rollback` | Rollback migrations      |
+Le serveur exécute `docker-compose.yml` (application + PostgreSQL) ; Caddy, installé sur l’hôte, termine le TLS et relaie vers `127.0.0.1:3333` (`deploy/Caddyfile`).
 
-## Stack / Resources
+- Chaque push sur la branche `staging` lance le workflow GitHub Actions _Staging_ : typecheck + build, puis déploiement par SSH. La clé utilisée est restreinte côté serveur à une seule commande (`deploy/deploy.sh`).
+- Au démarrage, le conteneur applique les migrations et les seeders idempotents. Le contenu de démonstration (membres et publications fictifs) n’est inséré en production que si `SEED_DEMO=true`.
+- Déploiement manuel sur le serveur : `./deploy/deploy.sh staging`.
+- Sauvegardes : `deploy/backup.sh` (dump PostgreSQL compressé, rotation 14 jours dans `~/backups/jscm`) est lancé chaque nuit par le timer systemd `jscm-backup` (`deploy/jscm-backup.{service,timer}`). Restauration : `docker compose exec -T db pg_restore -U <user> -d <base> --clean --if-exists < fichier.dump`.
 
-- [AdonisJS](https://adonisjs.com/)
-- [React.js](https://react.dev/)
-- [Inertia.js](https://inertiajs.com/)
-- [TailwindCSS](https://tailwindcss.com/)
-- [MySQL](https://www.mysql.com/)
-- [Lucid ORM](https://lucid.adonisjs.com/)
+## Contribuer
 
-## Contributing
+Les issues et pull requests sont les bienvenues. Ouvrez une issue pour discuter d’une fonctionnalité avant de vous lancer, gardez les PR ciblées, et vérifiez `npm run typecheck` et `node ace test` avant de pousser.
 
-Please read the contribution guide before creating an issue or sending a pull request.
+## Sécurité
 
-## Security Vulnerabilities
+Pour signaler une vulnérabilité, écrivez à [support@javascript.cm](mailto:support@javascript.cm) plutôt que d’ouvrir une issue publique.
 
-If you discover a security vulnerability in the application, please send an email to [support@javascript.cm](mailto:support@javascript.cm).
+## Licence
 
-## License
-
-The MIT License. Please see the License file for more information.
+MIT. Inspiré par [Laravel Cameroun](https://laravel.cm).

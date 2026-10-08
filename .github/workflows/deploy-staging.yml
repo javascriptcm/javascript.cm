@@ -1,0 +1,77 @@
+name: CI & staging deploy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/staging' }}
+
+jobs:
+  check:
+    name: Typecheck, tests & build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: jscm
+          POSTGRES_PASSWORD: jscm
+          POSTGRES_DB: jscm_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U jscm -d jscm_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i "s/^APP_KEY=.*/APP_KEY=$(openssl rand -hex 32)/" .env
+      - run: npm run typecheck
+      - run: node ace test
+      - run: node ace build
+
+  deploy:
+    name: Deploy to staging.javascript.cm
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: staging-deploy
+      cancel-in-progress: false
+    environment:
+      name: staging
+      url: https://staging.javascript.cm
+    steps:
+      - name: Check deploy secrets
+        id: secrets
+        env:
+          HOST: ${{ secrets.STAGING_HOST }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "::warning title=Deploy skipped::STAGING_SSH_KEY, STAGING_KNOWN_HOSTS, STAGING_HOST and STAGING_SSH_USER secrets are not configured."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Configure SSH
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.STAGING_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      # The key is restricted server-side (forced command): it can only run the deploy script.
+      - name: Deploy
+        if: steps.secrets.outputs.ready == 'true'
+        run: ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} deploy

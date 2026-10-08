@@ -1,18 +1,20 @@
-import { HttpContext } from '@adonisjs/core/http'
+import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import User from '#models/user'
 import { registerValidator } from '#validators/register_validator'
+import type { HttpContext } from '@adonisjs/core/http'
 
 export default class RegisterController {
   async show({ inertia }: HttpContext) {
-    return inertia.render('auth/register')
+    return inertia.render('auth/register', {})
   }
 
-  async store({ request, auth, response }: HttpContext) {
-    const data = await registerValidator.validate(request.all())
+  async store({ request, response, auth, session }: HttpContext) {
+    const { name, username, email, password } = await request.validateUsing(registerValidator)
+    const user = await User.create({ name, username, email, password, role: 'member' })
 
-    const user = await User.create(data)
     await auth.use('web').login(user)
-
-    return response.redirect().toRoute('dashboard')
+    session.put(SESSION_VERSION_KEY, user.sessionVersion)
+    session.flash('success', `Bienvenue dans la communauté, ${user.displayName} !`)
+    return response.redirect().toPath('/dashboard')
   }
 }

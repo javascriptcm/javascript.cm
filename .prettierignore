@@ -1,0 +1,6 @@
+.adonisjs
+node_modules
+build
+
+# Generated
+database/schema.ts

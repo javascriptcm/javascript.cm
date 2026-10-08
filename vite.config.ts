@@ -1,14 +1,17 @@
 import { defineConfig } from 'vite'
-import { getDirname } from '@adonisjs/core/helpers'
-import inertia from '@adonisjs/inertia/client'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import adonisjs from '@adonisjs/vite/client'
 
 export default defineConfig({
   plugins: [
-    inertia({ ssr: { enabled: true, entrypoint: 'inertia/app/ssr.tsx' } }),
     react(),
-    adonisjs({ entrypoints: ['inertia/app/app.tsx'], reload: ['resources/views/**/*.edge'] }),
+    tailwindcss(),
+    adonisjs({
+      entryPoints: ['inertia/app/app.tsx'],
+      serverEntryPoints: ['inertia/app/ssr.tsx'],
+      reload: ['resources/views/**/*.edge'],
+    }),
   ],
 
   /**
@@ -17,7 +20,14 @@ export default defineConfig({
    */
   resolve: {
     alias: {
-      '~/': `${getDirname(import.meta.url)}/inertia/`,
+      '~/': `${import.meta.dirname}/inertia/`,
+      '@generated': `${import.meta.dirname}/.adonisjs/client/`,
+    },
+  },
+
+  server: {
+    watch: {
+      ignored: ['**/storage/**', '**/tmp/**'],
     },
   },
 })

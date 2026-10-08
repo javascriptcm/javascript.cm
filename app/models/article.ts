@@ -1,45 +1,30 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import string from '@adonisjs/core/helpers/string'
+import { ArticleSchema } from '#database/schema'
+import { belongsTo, hasMany, manyToMany, scope } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
+import Tag from '#models/tag'
+import Reply from '#models/reply'
+import Like from '#models/like'
 
-export default class Article extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: number
-
-  @column()
-  declare title: string
-
-  @column()
-  declare slug: string
-
-  @column()
-  declare content: string
-
-  @column()
-  declare excerpt: string
-
-  @column()
-  declare isPublished: boolean
-
-  @column()
-  declare authorId: number
-
-  @belongsTo(() => User, { foreignKey: 'authorId' })
+export default class Article extends ArticleSchema {
+  @belongsTo(() => User)
   declare author: BelongsTo<typeof User>
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @manyToMany(() => Tag, { pivotTable: 'article_tag' })
+  declare tags: ManyToMany<typeof Tag>
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @hasMany(() => Reply)
+  declare comments: HasMany<typeof Reply>
 
-  @column.dateTime()
-  declare publishedAt: DateTime | null
+  @hasMany(() => Like)
+  declare likes: HasMany<typeof Like>
 
-  // Generate slug before saving
-  public async generateSlug() {
-    this.slug = string.slug(this.title)
+  static published = scope((query) => {
+    query.whereNotNull('published_at').where('published_at', '<=', DateTime.now().toSQL()!)
+  })
+
+  get isPublished() {
+    return this.publishedAt !== null && this.publishedAt <= DateTime.now()
   }
 }
