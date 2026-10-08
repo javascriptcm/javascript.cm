@@ -52,7 +52,7 @@ export default class NotificationTransformer extends BaseTransformer<Notificatio
     const notification = this.resource
     const reply = notification.reply
     return {
-      ...this.pick(notification, ['id', 'type', 'replyId', 'readAt', 'createdAt']),
+      ...this.pick(notification, ['id', 'type', 'replyId', 'readAt', 'createdAt', 'title', 'url']),
       isRead: notification.isRead,
       group: recencyGroup(notification.createdAt),
       href: `/notifications/${notification.id}`,

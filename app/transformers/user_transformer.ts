@@ -60,6 +60,8 @@ export default class UserTransformer extends BaseTransformer<User> {
       ...this.forProfile(),
       email: this.resource.email,
       hasPassword: this.resource.password !== null,
+      emailVerified:
+        this.resource.emailVerifiedAt !== null && this.resource.emailVerifiedAt !== undefined,
       isAdmin: this.resource.isAdmin,
       isModerator: this.resource.isModerator,
     }

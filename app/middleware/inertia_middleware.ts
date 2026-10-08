@@ -53,6 +53,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       preferences: ctx.inertia.always({ theme }),
       features: ctx.inertia.always(socialFeatures()),
       site: ctx.inertia.always({ url: env.get('APP_URL') }),
+      captcha: ctx.inertia.always({ siteKey: env.get('TURNSTILE_SITE_KEY') ?? null }),
       unreadNotifications: ctx.inertia.always(unreadNotifications),
       reportQueueCount: ctx.inertia.always(reportQueueCount),
     }

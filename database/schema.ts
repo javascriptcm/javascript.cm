@@ -110,6 +110,202 @@ export class DiscussionSchema extends BaseModel {
   declare viewsCount: number
 }
 
+export class EventRegistrationSchema extends BaseModel {
+  static $columns = ['checkedInAt', 'createdAt', 'eventId', 'id', 'remindedAt', 'status', 'ticketCode', 'updatedAt', 'userId'] as const
+  $columns = EventRegistrationSchema.$columns
+  @column.dateTime()
+  declare checkedInAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eventId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare remindedAt: DateTime | null
+  @column()
+  declare status: 'going' | 'waitlist' | 'cancelled'
+  @column()
+  declare ticketCode: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
+export class EventSchema extends BaseModel {
+  static $columns = ['address', 'capacity', 'city', 'coverUrl', 'createdAt', 'description', 'descriptionHtml', 'endsAt', 'format', 'id', 'mapUrl', 'onlineUrl', 'slug', 'startsAt', 'status', 'summary', 'title', 'updatedAt', 'userId', 'venueName'] as const
+  $columns = EventSchema.$columns
+  @column()
+  declare address: string | null
+  @column()
+  declare capacity: number | null
+  @column()
+  declare city: string | null
+  @column()
+  declare coverUrl: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column()
+  declare descriptionHtml: string
+  @column.dateTime()
+  declare endsAt: DateTime | null
+  @column()
+  declare format: 'in_person' | 'online' | 'hybrid'
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare mapUrl: string | null
+  @column()
+  declare onlineUrl: string | null
+  @column()
+  declare slug: string
+  @column.dateTime()
+  declare startsAt: DateTime
+  @column()
+  declare status: 'draft' | 'published' | 'cancelled'
+  @column()
+  declare summary: string | null
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+  @column()
+  declare venueName: string | null
+}
+
+export class JobSchema extends BaseModel {
+  static $columns = ['applyClicks', 'applyEmail', 'applyUrl', 'companyLogoUrl', 'companyName', 'companyUrl', 'contract', 'createdAt', 'description', 'descriptionHtml', 'expiresAt', 'featuredUntil', 'id', 'location', 'publishedAt', 'rejectionReason', 'remote', 'salaryCurrency', 'salaryMax', 'salaryMin', 'salaryPeriod', 'skills', 'slug', 'status', 'title', 'updatedAt', 'userId', 'viewsCount'] as const
+  $columns = JobSchema.$columns
+  @column()
+  declare applyClicks: number
+  @column()
+  declare applyEmail: string | null
+  @column()
+  declare applyUrl: string | null
+  @column()
+  declare companyLogoUrl: string | null
+  @column()
+  declare companyName: string
+  @column()
+  declare companyUrl: string | null
+  @column()
+  declare contract: 'cdi' | 'cdd' | 'freelance' | 'stage' | 'alternance'
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column()
+  declare descriptionHtml: string
+  @column.dateTime()
+  declare expiresAt: DateTime | null
+  @column.dateTime()
+  declare featuredUntil: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare location: string | null
+  @column.dateTime()
+  declare publishedAt: DateTime | null
+  @column()
+  declare rejectionReason: string | null
+  @column()
+  declare remote: 'onsite' | 'hybrid' | 'remote'
+  @column()
+  declare salaryCurrency: string
+  @column()
+  declare salaryMax: number | null
+  @column()
+  declare salaryMin: number | null
+  @column()
+  declare salaryPeriod: 'month' | 'year' | 'day' | 'project'
+  @jsonArrayColumn()
+  declare skills: string[]
+  @column()
+  declare slug: string
+  @column()
+  declare status: 'pending' | 'published' | 'rejected' | 'expired' | 'closed'
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+  @column()
+  declare viewsCount: number
+}
+
+export class LearningPathSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'descriptionHtml', 'id', 'isPublished', 'level', 'position', 'slug', 'summary', 'title', 'updatedAt'] as const
+  $columns = LearningPathSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column()
+  declare descriptionHtml: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isPublished: boolean
+  @column()
+  declare level: 'debutant' | 'intermediaire' | 'avance'
+  @column()
+  declare position: number
+  @column()
+  declare slug: string
+  @column()
+  declare summary: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class LearningProgressSchema extends BaseModel {
+  static $columns = ['completedAt', 'stepId', 'userId'] as const
+  $columns = LearningProgressSchema.$columns
+  @column.dateTime()
+  declare completedAt: DateTime
+  @column()
+  declare stepId: number
+  @column({ isPrimary: true })
+  declare userId: number
+}
+
+export class LearningStepSchema extends BaseModel {
+  static $columns = ['articleId', 'body', 'bodyHtml', 'createdAt', 'estimatedMinutes', 'id', 'pathId', 'position', 'resourceUrl', 'slug', 'title', 'updatedAt'] as const
+  $columns = LearningStepSchema.$columns
+  @column()
+  declare articleId: number | null
+  @column()
+  declare body: string
+  @column()
+  declare bodyHtml: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare estimatedMinutes: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare pathId: number
+  @column()
+  declare position: number
+  @column()
+  declare resourceUrl: string | null
+  @column()
+  declare slug: string
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class LikeSchema extends BaseModel {
   static $columns = ['articleId', 'createdAt', 'id', 'replyId', 'userId'] as const
   $columns = LikeSchema.$columns
@@ -125,8 +321,31 @@ export class LikeSchema extends BaseModel {
   declare userId: number
 }
 
+export class MediaSchema extends BaseModel {
+  static $columns = ['alt', 'createdAt', 'height', 'id', 'key', 'mime', 'size', 'userId', 'width'] as const
+  $columns = MediaSchema.$columns
+  @column()
+  declare alt: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare height: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare key: string
+  @column()
+  declare mime: string
+  @column()
+  declare size: number
+  @column()
+  declare userId: number | null
+  @column()
+  declare width: number
+}
+
 export class NotificationSchema extends BaseModel {
-  static $columns = ['actorId', 'articleId', 'createdAt', 'discussionId', 'id', 'readAt', 'replyId', 'threadId', 'type', 'userId'] as const
+  static $columns = ['actorId', 'articleId', 'createdAt', 'discussionId', 'id', 'readAt', 'replyId', 'threadId', 'title', 'type', 'url', 'userId'] as const
   $columns = NotificationSchema.$columns
   @column()
   declare actorId: number | null
@@ -145,7 +364,11 @@ export class NotificationSchema extends BaseModel {
   @column()
   declare threadId: number | null
   @column()
-  declare type: 'thread_reply' | 'discussion_reply' | 'article_comment' | 'solution_accepted'
+  declare title: string | null
+  @column()
+  declare type: 'thread_reply' | 'discussion_reply' | 'article_comment' | 'solution_accepted' | 'job_approved' | 'job_rejected' | 'event_reminder' | 'event_promoted' | 'event_cancelled'
+  @column()
+  declare url: string | null
   @column()
   declare userId: number
 }
@@ -240,9 +463,44 @@ export class ReportSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class SponsorSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'endsOn', 'id', 'isActive', 'logoUrl', 'name', 'position', 'slug', 'startsOn', 'tier', 'updatedAt', 'websiteUrl'] as const
+  $columns = SponsorSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column.date()
+  declare endsOn: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isActive: boolean
+  @column()
+  declare logoUrl: string | null
+  @column()
+  declare name: string
+  @column()
+  declare position: number
+  @column()
+  declare slug: string
+  @column.date()
+  declare startsOn: DateTime | null
+  @column()
+  declare tier: 'platinum' | 'gold' | 'silver' | 'community'
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare websiteUrl: string | null
+}
+
 export class TagSchema extends BaseModel {
-  static $columns = ['createdAt', 'description', 'id', 'name', 'slug', 'updatedAt'] as const
+  static $columns = ['body', 'bodyHtml', 'createdAt', 'description', 'id', 'name', 'slug', 'updatedAt'] as const
   $columns = TagSchema.$columns
+  @column()
+  declare body: string | null
+  @column()
+  declare bodyHtml: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
@@ -292,8 +550,29 @@ export class ThreadSchema extends BaseModel {
   declare viewsCount: number
 }
 
+export class UserTokenSchema extends BaseModel {
+  static $columns = ['createdAt', 'email', 'expiresAt', 'id', 'tokenHash', 'type', 'usedAt', 'userId'] as const
+  $columns = UserTokenSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare email: string | null
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column({ serializeAs: null })
+  declare tokenHash: string
+  @column()
+  declare type: 'password_reset' | 'email_verification'
+  @column.dateTime()
+  declare usedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class UserSchema extends BaseModel {
-  static $columns = ['appleId', 'availability', 'avatarUrl', 'bannedAt', 'bio', 'createdAt', 'cvOriginalName', 'cvPath', 'cvSize', 'cvUploadedAt', 'cvVisibility', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'googleId', 'headline', 'id', 'linkedinUsername', 'links', 'location', 'name', 'password', 'portfolioUrl', 'role', 'sessionVersion', 'skills', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
+  static $columns = ['appleId', 'availability', 'avatarUrl', 'bannedAt', 'bio', 'createdAt', 'cvOriginalName', 'cvPath', 'cvSize', 'cvUploadedAt', 'cvVisibility', 'email', 'emailNotifications', 'emailVerifiedAt', 'githubId', 'githubUsername', 'googleId', 'headline', 'id', 'linkedinUsername', 'links', 'locale', 'location', 'name', 'password', 'portfolioUrl', 'role', 'sessionVersion', 'skills', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl', 'weeklyDigest'] as const
   $columns = UserSchema.$columns
   @column()
   declare appleId: string | null
@@ -319,6 +598,8 @@ export class UserSchema extends BaseModel {
   declare cvVisibility: 'public' | 'members' | 'private'
   @column()
   declare email: string
+  @column()
+  declare emailNotifications: boolean
   @column.dateTime()
   declare emailVerifiedAt: DateTime | null
   @column()
@@ -335,6 +616,8 @@ export class UserSchema extends BaseModel {
   declare linkedinUsername: string | null
   @jsonArrayColumn()
   declare links: ProfileLink[]
+  @column()
+  declare locale: 'fr' | 'en' | null
   @column()
   declare location: string | null
   @column()
@@ -357,4 +640,6 @@ export class UserSchema extends BaseModel {
   declare username: string
   @column()
   declare websiteUrl: string | null
+  @column()
+  declare weeklyDigest: boolean
 }

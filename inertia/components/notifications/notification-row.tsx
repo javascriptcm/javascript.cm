@@ -1,6 +1,14 @@
 import { Link, router } from '@inertiajs/react'
 import { useState, type ReactNode } from 'react'
-import { Check, MessageSquare, MessagesSquare, Newspaper, type LucideIcon } from 'lucide-react'
+import {
+  BriefcaseBusiness,
+  CalendarDays,
+  Check,
+  MessageSquare,
+  MessagesSquare,
+  Newspaper,
+  type LucideIcon,
+} from 'lucide-react'
 import type { Data } from '@generated/data'
 import { Avatar } from '~/components/ui/avatar'
 import { TimeAgo } from '~/components/ui/time-ago'
@@ -14,6 +22,11 @@ const KIND: Record<Kind, { label: string; icon: LucideIcon }> = {
   discussion_reply: { label: 'Discussion', icon: MessagesSquare },
   article_comment: { label: 'Article', icon: Newspaper },
   solution_accepted: { label: 'Solution', icon: Check },
+  job_approved: { label: 'Emploi', icon: BriefcaseBusiness },
+  job_rejected: { label: 'Emploi', icon: BriefcaseBusiness },
+  event_reminder: { label: 'Événement', icon: CalendarDays },
+  event_promoted: { label: 'Événement', icon: CalendarDays },
+  event_cancelled: { label: 'Événement', icon: CalendarDays },
 }
 
 /**
@@ -21,6 +34,9 @@ const KIND: Record<Kind, { label: string; icon: LucideIcon }> = {
  * ont aussi commenté l’article « … »", "Votre réponse a été acceptée…".
  */
 function sentence(notification: Notification): ReactNode {
+  // Generic notifications (jobs, events) carry their own sentence.
+  if (notification.title) return <span className="text-ink">{notification.title}</span>
+
   const { subject } = notification
   const title = subject ? (
     <span className="text-ink">«&nbsp;{subject.title}&nbsp;»</span>

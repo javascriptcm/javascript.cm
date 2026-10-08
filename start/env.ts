@@ -43,6 +43,10 @@ export default await Env.create(new URL('../', import.meta.url), {
   // variables are set; otherwise its button is hidden and its routes 404.
   // Callback URLs: ${APP_URL}/auth/<github|google|apple>/callback
 
+  // Cloudflare Turnstile (anti-bot on sign-up; disabled when unset)
+  TURNSTILE_SITE_KEY: Env.schema.string.optional(),
+  TURNSTILE_SECRET_KEY: Env.schema.string.optional(),
+
   // GitHub OAuth app
   GITHUB_CLIENT_ID: Env.schema.string.optional(),
   GITHUB_CLIENT_SECRET: Env.schema.string.optional(),

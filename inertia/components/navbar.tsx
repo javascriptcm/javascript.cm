@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, usePage, router } from '@inertiajs/react'
 import {
   Bell,
+  ChevronDown,
   LayoutDashboard,
   Search,
   LogOut,
@@ -20,11 +21,15 @@ import { ButtonLink, buttonClasses } from '~/components/ui/button'
 import { Menu, MenuDivider, MenuHeader, MenuLink } from '~/components/ui/menu'
 import { cn } from '~/lib/format'
 
-export const NAV = [
+export const NAV: { href: string; label: string; code: string; secondary?: boolean }[] = [
   { href: '/articles', label: 'Articles', code: 'ART' },
   { href: '/forum', label: 'Forum', code: 'FRM' },
   { href: '/discussions', label: 'Discussions', code: 'DSC' },
-  { href: '/membres', label: 'Membres', code: 'MBR' },
+  { href: '/emplois', label: 'Emplois', code: 'JOB' },
+  // Grouped under "Plus" between lg and xl (not enough room for all).
+  { href: '/evenements', label: 'Événements', code: 'EVT', secondary: true },
+  { href: '/apprendre', label: 'Apprendre', code: 'LRN', secondary: true },
+  { href: '/membres', label: 'Membres', code: 'MBR', secondary: true },
 ]
 
 function isActive(url: string, href: string) {
@@ -54,19 +59,19 @@ export default function Navbar() {
           Aller au contenu
         </a>
         <div className="shell flex h-16 items-center justify-between gap-6">
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-6 xl:gap-8">
             <Logo />
             <nav aria-label="Navigation principale" className="hidden lg:block">
               <ul className="flex items-center gap-1">
                 {NAV.map((item) => {
                   const active = isActive(url, item.href)
                   return (
-                    <li key={item.href}>
+                    <li key={item.href} className={cn(item.secondary && 'hidden xl:block')}>
                       <Link
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         className={cn(
-                          'relative inline-flex h-10 items-center px-3 text-[15.5px] font-medium transition-colors',
+                          'relative inline-flex h-10 items-center px-2.5 text-[15.5px] font-medium transition-colors',
                           active ? 'text-ink' : 'text-ink-2 hover:text-ink'
                         )}
                       >
@@ -75,6 +80,29 @@ export default function Navbar() {
                     </li>
                   )
                 })}
+                <li className="xl:hidden">
+                  <Menu
+                    anchor="bottom start"
+                    buttonLabel="Plus de rubriques"
+                    buttonClassName={cn(
+                      'inline-flex h-10 items-center gap-1 px-2.5 text-[15.5px] font-medium transition-colors',
+                      NAV.some((item) => item.secondary && isActive(url, item.href))
+                        ? 'text-ink'
+                        : 'text-ink-2 hover:text-ink'
+                    )}
+                    button={
+                      <>
+                        Plus <ChevronDown size={15} strokeWidth={2} />
+                      </>
+                    }
+                  >
+                    {NAV.filter((item) => item.secondary).map((item) => (
+                      <MenuLink key={item.href} href={item.href}>
+                        {item.label}
+                      </MenuLink>
+                    ))}
+                  </Menu>
+                </li>
               </ul>
             </nav>
           </div>

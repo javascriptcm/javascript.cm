@@ -1,5 +1,9 @@
 import { Link, usePage } from '@inertiajs/react'
 import {
+  BriefcaseBusiness,
+  CalendarDays,
+  ChartNoAxesColumn,
+  HandHeart,
   ArrowLeft,
   ArrowUpRight,
   Bell,
@@ -45,6 +49,10 @@ const ADMIN_ITEMS: Item[] = [
   { href: '/admin/membres', label: 'Membres', icon: Users },
   { href: '/admin/tags', label: 'Tags', icon: Hash },
   { href: '/admin/canaux', label: 'Canaux', icon: MessagesSquare },
+  { href: '/admin/emplois', label: 'Offres d’emploi', icon: BriefcaseBusiness },
+  { href: '/admin/evenements', label: 'Événements', icon: CalendarDays },
+  { href: '/admin/sponsors', label: 'Sponsors', icon: HandHeart },
+  { href: '/admin/statistiques', label: 'Statistiques', icon: ChartNoAxesColumn },
 ]
 
 function NavItem({ item, index, active }: { item: Item; index?: number; active: boolean }) {

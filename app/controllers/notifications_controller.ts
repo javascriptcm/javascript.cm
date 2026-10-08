@@ -1,3 +1,4 @@
+import { safeRedirectPath } from '#services/safe_redirect'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
@@ -41,6 +42,9 @@ async function replyPage(
  * Where a notification leads: the exact reply, on the right page.
  */
 async function targetOf(notification: Notification) {
+  // Generic notifications (jobs, events) carry their own same-site link.
+  if (notification.url) return safeRedirectPath(notification.url, '') || null
+
   const anchor = notification.replyId ? `#reponse-${notification.replyId}` : ''
 
   if (notification.threadId !== null) {

@@ -288,3 +288,34 @@ export async function markSubjectRead(
     .whereNull('read_at')
     .update({ read_at: DateTime.now().toSQL() })
 }
+
+export type GenericNotificationType = Extract<
+  NotificationType,
+  'job_approved' | 'job_rejected' | 'event_reminder' | 'event_promoted' | 'event_cancelled'
+>
+
+/**
+ * Notification that carries its own sentence and link (job moderation,
+ * event reminders…). Failures are logged, never thrown: a notification must
+ * not break the action that triggered it.
+ */
+export async function createNotification(input: {
+  userId: number
+  type: GenericNotificationType
+  title: string
+  url: string
+  actorId?: number | null
+}) {
+  try {
+    await db.table('notifications').insert({
+      user_id: input.userId,
+      actor_id: input.actorId ?? null,
+      type: input.type,
+      title: input.title.slice(0, 200),
+      url: input.url.slice(0, 500),
+      created_at: DateTime.now().toSQL(),
+    })
+  } catch (error) {
+    logger.error({ err: error, type: input.type }, 'notification failed')
+  }
+}
