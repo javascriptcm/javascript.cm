@@ -35,8 +35,12 @@ export function Menu({
   )
 }
 
-const itemClasses =
-  'flex w-full items-center gap-3 rounded-xs px-3 py-2.5 text-left text-[15px] text-ink-2 data-focus:bg-js data-focus:text-js-ink'
+// Base item; the color pair is chosen separately so "danger" never fights
+// the default text color.
+const itemBase = 'flex w-full items-center gap-3 rounded-xs px-3 py-2.5 text-left text-[15px]'
+const itemTone = 'text-ink-2 data-focus:bg-js data-focus:text-js-ink'
+const dangerTone = 'text-danger data-focus:bg-danger data-focus:text-paper'
+const itemClasses = cn(itemBase, itemTone)
 
 export function MenuLink({
   href,
@@ -72,7 +76,11 @@ export function MenuAction({
 }) {
   return (
     <MenuItem>
-      <button type="button" onClick={onClick} className={cn(itemClasses, danger && 'text-danger')}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(itemBase, danger ? dangerTone : itemTone)}
+      >
         {icon && <span className="shrink-0 opacity-70">{icon}</span>}
         {children}
       </button>

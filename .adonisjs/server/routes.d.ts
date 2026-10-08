@@ -56,6 +56,12 @@ export type ScannedRoutes = {
     'discussions.pin': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.lock': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'notifications.index': { paramsTuple?: []; params?: {} }
+    'notifications.read_all': { paramsTuple?: []; params?: {} }
+    'notifications.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'reports.store': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'settings.profile': { paramsTuple?: []; params?: {} }
@@ -66,6 +72,10 @@ export type ScannedRoutes = {
     'settings.account.destroy': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
+    'admin.reports.index': { paramsTuple?: []; params?: {} }
+    'admin.reports.resolve': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
+    'admin.reports.dismiss': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
+    'admin.reports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.members.index': { paramsTuple?: []; params?: {} }
     'admin.members.role': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.members.ban': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -103,6 +113,9 @@ export type ScannedRoutes = {
     'discussions.create': { paramsTuple?: []; params?: {} }
     'discussions.edit': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'notifications.index': { paramsTuple?: []; params?: {} }
+    'notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.index': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'settings.profile': { paramsTuple?: []; params?: {} }
@@ -110,6 +123,7 @@ export type ScannedRoutes = {
     'settings.account': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
+    'admin.reports.index': { paramsTuple?: []; params?: {} }
     'admin.members.index': { paramsTuple?: []; params?: {} }
     'admin.tags.index': { paramsTuple?: []; params?: {} }
     'admin.channels.index': { paramsTuple?: []; params?: {} }
@@ -138,6 +152,9 @@ export type ScannedRoutes = {
     'discussions.create': { paramsTuple?: []; params?: {} }
     'discussions.edit': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'search': { paramsTuple?: []; params?: {} }
+    'notifications.index': { paramsTuple?: []; params?: {} }
+    'notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.index': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'settings.profile': { paramsTuple?: []; params?: {} }
@@ -145,6 +162,7 @@ export type ScannedRoutes = {
     'settings.account': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
+    'admin.reports.index': { paramsTuple?: []; params?: {} }
     'admin.members.index': { paramsTuple?: []; params?: {} }
     'admin.tags.index': { paramsTuple?: []; params?: {} }
     'admin.channels.index': { paramsTuple?: []; params?: {} }
@@ -170,6 +188,11 @@ export type ScannedRoutes = {
     'discussions.replies.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.pin': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.lock': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'notifications.read_all': { paramsTuple?: []; params?: {} }
+    'notifications.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'reports.store': { paramsTuple?: []; params?: {} }
+    'admin.reports.resolve': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
+    'admin.reports.dismiss': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.members.ban': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.tags.store': { paramsTuple?: []; params?: {} }
     'admin.channels.store': { paramsTuple?: []; params?: {} }
@@ -192,6 +215,7 @@ export type ScannedRoutes = {
     'forum.solution.destroy': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.destroy': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'settings.account.destroy': { paramsTuple?: []; params?: {} }
+    'admin.reports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.members.unban': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.channels.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

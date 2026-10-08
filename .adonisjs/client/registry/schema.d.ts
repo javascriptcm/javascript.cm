@@ -631,6 +631,78 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/discussions_controller').default['show']>>>
     }
   }
+  'search': {
+    methods: ["GET","HEAD"]
+    pattern: '/recherche'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>>
+    }
+  }
+  'notifications.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/notifications'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['index']>>>
+    }
+  }
+  'notifications.read_all': {
+    methods: ["POST"]
+    pattern: '/notifications/read-all'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['readAll']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['readAll']>>>
+    }
+  }
+  'notifications.read': {
+    methods: ["POST"]
+    pattern: '/notifications/:id/read'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['read']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['read']>>>
+    }
+  }
+  'notifications.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/notifications/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['show']>>>
+    }
+  }
+  'reports.store': {
+    methods: ["POST"]
+    pattern: '/signalements'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/report_validator').reportValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/report_validator').reportValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'members.index': {
     methods: ["GET","HEAD"]
     pattern: '/membres'
@@ -749,6 +821,54 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/overview_controller').default['index']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/overview_controller').default['index']>>>
+    }
+  }
+  'admin.reports.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/signalements'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['index']>>>
+    }
+  }
+  'admin.reports.resolve': {
+    methods: ["POST"]
+    pattern: '/admin/signalements/:target/:id/traiter'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { target: ParamValue; id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['resolve']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['resolve']>>>
+    }
+  }
+  'admin.reports.dismiss': {
+    methods: ["POST"]
+    pattern: '/admin/signalements/:target/:id/ignorer'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { target: ParamValue; id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['dismiss']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['dismiss']>>>
+    }
+  }
+  'admin.reports.destroy': {
+    methods: ["DELETE"]
+    pattern: '/admin/signalements/:target/:id/contenu'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { target: ParamValue; id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['destroyContent']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/reports_controller').default['destroyContent']>>>
     }
   }
   'admin.members.index': {

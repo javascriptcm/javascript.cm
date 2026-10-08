@@ -81,6 +81,16 @@ export interface ApiDefinition {
     lock: typeof routes['discussions.lock']
     show: typeof routes['discussions.show']
   }
+  search: typeof routes['search']
+  notifications: {
+    index: typeof routes['notifications.index']
+    readAll: typeof routes['notifications.read_all']
+    read: typeof routes['notifications.read']
+    show: typeof routes['notifications.show']
+  }
+  reports: {
+    store: typeof routes['reports.store']
+  }
   members: {
     index: typeof routes['members.index']
   }
@@ -101,6 +111,12 @@ export interface ApiDefinition {
   }
   admin: {
     index: typeof routes['admin.index']
+    reports: {
+      index: typeof routes['admin.reports.index']
+      resolve: typeof routes['admin.reports.resolve']
+      dismiss: typeof routes['admin.reports.dismiss']
+      destroy: typeof routes['admin.reports.destroy']
+    }
     members: {
       index: typeof routes['admin.members.index']
       role: typeof routes['admin.members.role']

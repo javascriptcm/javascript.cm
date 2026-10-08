@@ -5,6 +5,7 @@ import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 import { githubEnabled } from '#config/ally'
 import env from '#start/env'
 import db from '@adonisjs/lucid/services/db'
+import { reportQueueCounts } from '#controllers/admin/reports_controller'
 
 export type ThemePreference = 'light' | 'dark' | 'system'
 
@@ -33,6 +34,13 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       unreadNotifications = Number(row?.total ?? 0)
     }
 
+    // Moderation queue badge (staff only: no query for regular members).
+    let reportQueueCount = 0
+    if (auth?.user?.isModerator) {
+      const counts = await reportQueueCounts()
+      reportQueueCount = counts.open
+    }
+
     /**
      * Data shared with all Inertia pages. Make sure you are using
      * transformers for rich data-types like Models.
@@ -46,6 +54,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       features: ctx.inertia.always({ github: githubEnabled() }),
       site: ctx.inertia.always({ url: env.get('APP_URL') }),
       unreadNotifications: ctx.inertia.always(unreadNotifications),
+      reportQueueCount: ctx.inertia.always(reportQueueCount),
     }
   }
 

@@ -318,6 +318,42 @@ const routes = {
     tokens: [{"old":"/discussions/:slug","type":0,"val":"discussions","end":""},{"old":"/discussions/:slug","type":1,"val":"slug","end":""}],
     types: placeholder as Registry['discussions.show']['types'],
   },
+  'search': {
+    methods: ["GET","HEAD"],
+    pattern: '/recherche',
+    tokens: [{"old":"/recherche","type":0,"val":"recherche","end":""}],
+    types: placeholder as Registry['search']['types'],
+  },
+  'notifications.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/notifications',
+    tokens: [{"old":"/notifications","type":0,"val":"notifications","end":""}],
+    types: placeholder as Registry['notifications.index']['types'],
+  },
+  'notifications.read_all': {
+    methods: ["POST"],
+    pattern: '/notifications/read-all',
+    tokens: [{"old":"/notifications/read-all","type":0,"val":"notifications","end":""},{"old":"/notifications/read-all","type":0,"val":"read-all","end":""}],
+    types: placeholder as Registry['notifications.read_all']['types'],
+  },
+  'notifications.read': {
+    methods: ["POST"],
+    pattern: '/notifications/:id/read',
+    tokens: [{"old":"/notifications/:id/read","type":0,"val":"notifications","end":""},{"old":"/notifications/:id/read","type":1,"val":"id","end":""},{"old":"/notifications/:id/read","type":0,"val":"read","end":""}],
+    types: placeholder as Registry['notifications.read']['types'],
+  },
+  'notifications.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/notifications/:id',
+    tokens: [{"old":"/notifications/:id","type":0,"val":"notifications","end":""},{"old":"/notifications/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['notifications.show']['types'],
+  },
+  'reports.store': {
+    methods: ["POST"],
+    pattern: '/signalements',
+    tokens: [{"old":"/signalements","type":0,"val":"signalements","end":""}],
+    types: placeholder as Registry['reports.store']['types'],
+  },
   'members.index': {
     methods: ["GET","HEAD"],
     pattern: '/membres',
@@ -377,6 +413,30 @@ const routes = {
     pattern: '/admin',
     tokens: [{"old":"/admin","type":0,"val":"admin","end":""}],
     types: placeholder as Registry['admin.index']['types'],
+  },
+  'admin.reports.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/signalements',
+    tokens: [{"old":"/admin/signalements","type":0,"val":"admin","end":""},{"old":"/admin/signalements","type":0,"val":"signalements","end":""}],
+    types: placeholder as Registry['admin.reports.index']['types'],
+  },
+  'admin.reports.resolve': {
+    methods: ["POST"],
+    pattern: '/admin/signalements/:target/:id/traiter',
+    tokens: [{"old":"/admin/signalements/:target/:id/traiter","type":0,"val":"admin","end":""},{"old":"/admin/signalements/:target/:id/traiter","type":0,"val":"signalements","end":""},{"old":"/admin/signalements/:target/:id/traiter","type":1,"val":"target","end":""},{"old":"/admin/signalements/:target/:id/traiter","type":1,"val":"id","end":""},{"old":"/admin/signalements/:target/:id/traiter","type":0,"val":"traiter","end":""}],
+    types: placeholder as Registry['admin.reports.resolve']['types'],
+  },
+  'admin.reports.dismiss': {
+    methods: ["POST"],
+    pattern: '/admin/signalements/:target/:id/ignorer',
+    tokens: [{"old":"/admin/signalements/:target/:id/ignorer","type":0,"val":"admin","end":""},{"old":"/admin/signalements/:target/:id/ignorer","type":0,"val":"signalements","end":""},{"old":"/admin/signalements/:target/:id/ignorer","type":1,"val":"target","end":""},{"old":"/admin/signalements/:target/:id/ignorer","type":1,"val":"id","end":""},{"old":"/admin/signalements/:target/:id/ignorer","type":0,"val":"ignorer","end":""}],
+    types: placeholder as Registry['admin.reports.dismiss']['types'],
+  },
+  'admin.reports.destroy': {
+    methods: ["DELETE"],
+    pattern: '/admin/signalements/:target/:id/contenu',
+    tokens: [{"old":"/admin/signalements/:target/:id/contenu","type":0,"val":"admin","end":""},{"old":"/admin/signalements/:target/:id/contenu","type":0,"val":"signalements","end":""},{"old":"/admin/signalements/:target/:id/contenu","type":1,"val":"target","end":""},{"old":"/admin/signalements/:target/:id/contenu","type":1,"val":"id","end":""},{"old":"/admin/signalements/:target/:id/contenu","type":0,"val":"contenu","end":""}],
+    types: placeholder as Registry['admin.reports.destroy']['types'],
   },
   'admin.members.index': {
     methods: ["GET","HEAD"],

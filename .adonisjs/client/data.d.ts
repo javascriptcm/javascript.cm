@@ -9,7 +9,9 @@ import type { InferSharedProps, InferFlashData } from '@adonisjs/inertia/types'
 import type ArticleTransformer from '#transformers/article_transformer'
 import type ChannelTransformer from '#transformers/channel_transformer'
 import type DiscussionTransformer from '#transformers/discussion_transformer'
+import type NotificationTransformer from '#transformers/notification_transformer'
 import type ReplyTransformer from '#transformers/reply_transformer'
+import type ReportTransformer from '#transformers/report_transformer'
 import type TagTransformer from '#transformers/tag_transformer'
 import type ThreadTransformer from '#transformers/thread_transformer'
 import type UserTransformer from '#transformers/user_transformer'
@@ -28,9 +30,17 @@ export namespace Data {
   export namespace Discussion {
     export type Variants = InferVariants<DiscussionTransformer>
   }
+  export type Notification = InferData<NotificationTransformer>
+  export namespace Notification {
+    export type Variants = InferVariants<NotificationTransformer>
+  }
   export type Reply = InferData<ReplyTransformer>
   export namespace Reply {
     export type Variants = InferVariants<ReplyTransformer>
+  }
+  export type Report = InferData<ReportTransformer>
+  export namespace Report {
+    export type Variants = InferVariants<ReportTransformer>
   }
   export type Tag = InferData<TagTransformer>
   export namespace Tag {

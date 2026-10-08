@@ -15,6 +15,7 @@ declare module '@adonisjs/inertia/types' {
     'admin/channels': ExtractProps<(typeof import('../../inertia/pages/admin/channels.tsx'))['default']>
     'admin/index': ExtractProps<(typeof import('../../inertia/pages/admin/index.tsx'))['default']>
     'admin/members': ExtractProps<(typeof import('../../inertia/pages/admin/members.tsx'))['default']>
+    'admin/reports': ExtractProps<(typeof import('../../inertia/pages/admin/reports.tsx'))['default']>
     'admin/tags': ExtractProps<(typeof import('../../inertia/pages/admin/tags.tsx'))['default']>
     'articles/[slug]': ExtractProps<(typeof import('../../inertia/pages/articles/[slug].tsx'))['default']>
     'articles/create': ExtractProps<(typeof import('../../inertia/pages/articles/create.tsx'))['default']>
@@ -35,9 +36,11 @@ declare module '@adonisjs/inertia/types' {
     'forum/show': ExtractProps<(typeof import('../../inertia/pages/forum/show.tsx'))['default']>
     'home': ExtractProps<(typeof import('../../inertia/pages/home.tsx'))['default']>
     'members/index': ExtractProps<(typeof import('../../inertia/pages/members/index.tsx'))['default']>
+    'notifications/index': ExtractProps<(typeof import('../../inertia/pages/notifications/index.tsx'))['default']>
     'pages/about': ExtractProps<(typeof import('../../inertia/pages/pages/about.tsx'))['default']>
     'pages/code_of_conduct': ExtractProps<(typeof import('../../inertia/pages/pages/code_of_conduct.tsx'))['default']>
     'profile/show': ExtractProps<(typeof import('../../inertia/pages/profile/show.tsx'))['default']>
+    'search/index': ExtractProps<(typeof import('../../inertia/pages/search/index.tsx'))['default']>
     'settings/account': ExtractProps<(typeof import('../../inertia/pages/settings/account.tsx'))['default']>
     'settings/password': ExtractProps<(typeof import('../../inertia/pages/settings/password.tsx'))['default']>
     'settings/profile': ExtractProps<(typeof import('../../inertia/pages/settings/profile.tsx'))['default']>
