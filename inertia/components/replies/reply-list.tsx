@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link, router, useForm, usePage } from '@inertiajs/react'
-import { Heart, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Flag, Heart, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import type { Data } from '@generated/data'
 import { Avatar } from '~/components/ui/avatar'
 import { Prose } from '~/components/ui/prose'
@@ -8,7 +8,8 @@ import { TimeAgo } from '~/components/ui/time-ago'
 import { Button } from '~/components/ui/button'
 import { MarkdownEditor } from '~/components/ui/markdown-editor'
 import { ConfirmDialog } from '~/components/ui/confirm-dialog'
-import { Menu, MenuAction } from '~/components/ui/menu'
+import { Menu, MenuAction, MenuDivider } from '~/components/ui/menu'
+import { ReportDialog } from '~/components/reports/report-dialog'
 import { cn } from '~/lib/format'
 
 type Reply = Data.Reply
@@ -34,6 +35,7 @@ export function ReplyItem({
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [reporting, setReporting] = useState(false)
   const form = useForm({ body: reply.body })
   // Same rule as User.canManageContent: owner, admins, or moderators on
   // regular members' replies.
@@ -45,6 +47,8 @@ export function ReplyItem({
       (user.isModerator && reply.author.role === 'member'))
   )
   const isMine = Boolean(user && reply.author && user.id === reply.author.id)
+  // Any signed-in member can flag someone else's reply for the moderators.
+  const canReport = Boolean(user && reply.author && !isMine)
 
   function save() {
     form.put(`/replies/${reply.id}`, { preserveScroll: true, onSuccess: () => setEditing(false) })
@@ -104,19 +108,36 @@ export function ReplyItem({
             <TimeAgo date={reply.createdAt} />
           </a>
           {badge}
-          {canManage && !editing && (
+          {(canManage || canReport) && !editing && (
             <div className="ml-auto">
               <Menu
                 buttonLabel="Actions sur la réponse"
-                buttonClassName="grid size-8 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink"
+                buttonClassName="grid size-8 place-items-center rounded-sm text-muted hover:bg-paper-2 hover:text-ink focus-visible:shadow-[0_0_0_3px_var(--js)] focus-visible:outline-none data-open:bg-paper-2 data-open:text-ink"
                 button={<MoreHorizontal size={17} />}
               >
-                <MenuAction onClick={() => setEditing(true)} icon={<Pencil size={15} />}>
-                  Modifier
-                </MenuAction>
-                <MenuAction onClick={() => setConfirming(true)} icon={<Trash2 size={15} />} danger>
-                  Supprimer
-                </MenuAction>
+                {canManage && (
+                  <>
+                    <MenuAction onClick={() => setEditing(true)} icon={<Pencil size={15} />}>
+                      Modifier
+                    </MenuAction>
+                    <MenuAction
+                      onClick={() => setConfirming(true)}
+                      icon={<Trash2 size={15} />}
+                      danger
+                    >
+                      Supprimer
+                    </MenuAction>
+                  </>
+                )}
+                {canManage && canReport && <MenuDivider />}
+                {canReport && (
+                  <MenuAction
+                    onClick={() => setReporting(true)}
+                    icon={<Flag size={15} strokeWidth={1.75} />}
+                  >
+                    Signaler
+                  </MenuAction>
+                )}
               </Menu>
             </div>
           )}
@@ -177,6 +198,15 @@ export function ReplyItem({
         title="Supprimer cette réponse ?"
         description="Elle disparaîtra définitivement de la conversation."
       />
+      {canReport && (
+        <ReportDialog
+          open={reporting}
+          onClose={() => setReporting(false)}
+          target="reply"
+          id={reply.id}
+          noun={reply.articleId ? 'ce commentaire' : 'cette réponse'}
+        />
+      )}
     </article>
   )
 }

@@ -9,7 +9,7 @@ import { EmptyState } from '~/components/ui/empty-state'
 import { WorkspaceHeader, WorkspaceSectionTitle } from '~/components/dashboard/workspace-header'
 import { Readout } from '~/components/dashboard/readout'
 import { RoleBadge } from '~/components/profile/role-badge'
-import { plural } from '~/lib/format'
+import { cn, plural } from '~/lib/format'
 
 type Member = Data.User.Variants['forModeration'] & { email?: string }
 
@@ -26,7 +26,9 @@ type Props = {
     | 'discussions'
     | 'replies'
     | 'tags'
-    | 'channels',
+    | 'channels'
+    | 'reports_open'
+    | 'reports_queue',
     number
   >
   members: Member[]
@@ -109,6 +111,55 @@ export default function AdminIndex({ stats, members, articles, threads, discussi
         }
         lead={`${plural(stats.signups_week, 'inscription', 'inscriptions', 'Aucune inscription')} ces 7 derniers jours · ${plural(stats.unsolved, 'question', 'questions', 'aucune question')} sans solution.`}
       />
+
+      <section aria-labelledby="admin-queue" className="mt-8">
+        <h2 id="admin-queue" className="sr-only">
+          Modération
+        </h2>
+        <Link
+          href="/admin/signalements"
+          className={cn(
+            'group flex flex-col gap-4 rounded-sm border px-5 py-4 transition-colors duration-150 sm:flex-row sm:items-center sm:justify-between',
+            stats.reports_queue
+              ? 'border-ink bg-card hover:bg-paper-2'
+              : 'border-dashed border-line-2 hover:border-ink'
+          )}
+        >
+          <span className="flex min-w-0 items-center gap-4">
+            <span
+              className={cn(
+                'grid h-11 min-w-11 shrink-0 place-items-center rounded-sm border px-2 font-mono text-[17px] font-semibold tabular-nums',
+                stats.reports_queue ? 'border-ink bg-js text-js-ink' : 'border-line-2 text-muted'
+              )}
+              aria-hidden="true"
+            >
+              {stats.reports_queue}
+            </span>
+            <span className="min-w-0">
+              <span className="label block">File de modération</span>
+              <span className="mt-0.5 block text-[16.5px] leading-snug font-semibold">
+                {stats.reports_queue
+                  ? `${plural(stats.reports_queue, 'contenu signalé', 'contenus signalés')} à examiner`
+                  : 'Aucun signalement en attente'}
+              </span>
+              {stats.reports_queue > 0 && stats.reports_open > stats.reports_queue && (
+                <span className="block text-[13.5px] text-muted">
+                  {plural(stats.reports_open, 'signalement ouvert', 'signalements ouverts')} au
+                  total
+                </span>
+              )}
+            </span>
+          </span>
+          <span className="label inline-flex shrink-0 items-center gap-1.5 text-ink">
+            <span className="link-draw">Ouvrir la file</span>
+            <ArrowRight
+              size={14}
+              className="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
+        </Link>
+      </section>
 
       <section aria-labelledby="admin-counters" className="mt-8">
         <h2 id="admin-counters" className="sr-only">
@@ -239,6 +290,7 @@ export default function AdminIndex({ stats, members, articles, threads, discussi
             <p className="label">Raccourcis</p>
             <ul className="mt-3 grid gap-1">
               {[
+                ['/admin/signalements', 'La file de modération'],
                 ['/admin/membres?filtre=suspendus', 'Comptes suspendus'],
                 ['/admin/membres?filtre=equipe', 'L’équipe de modération'],
                 ['/admin/canaux', 'Organiser les canaux du forum'],

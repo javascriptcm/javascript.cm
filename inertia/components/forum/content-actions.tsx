@@ -1,12 +1,17 @@
 import { useState } from 'react'
-import { router } from '@inertiajs/react'
-import { Lock, LockOpen, Pencil, Pin, PinOff, Settings2, Trash2 } from 'lucide-react'
+import { router, usePage } from '@inertiajs/react'
+import { Flag, Lock, LockOpen, Pencil, Pin, PinOff, Settings2, Trash2 } from 'lucide-react'
 import { Menu, MenuAction, MenuDivider, MenuLink } from '~/components/ui/menu'
 import { ConfirmDialog } from '~/components/ui/confirm-dialog'
+import { ReportDialog } from '~/components/reports/report-dialog'
+
+type ReportSubject = { id: number; authorId: number | null }
 
 /**
  * Owner / moderator menu of a thread or a discussion: edit, delete,
- * and for moderators pin + lock toggles.
+ * and for moderators pin + lock toggles. Signed-in members who did not
+ * write the content get "Signaler" (a plain button when that is all they
+ * can do).
  */
 export function ContentActions({
   basePath,
@@ -15,6 +20,7 @@ export function ContentActions({
   canModerate,
   pinned,
   locked,
+  report,
 }: {
   basePath: string
   noun: 'question' | 'discussion'
@@ -22,13 +28,46 @@ export function ContentActions({
   canModerate: boolean
   pinned: boolean
   locked: boolean
+  /** Content to report; defaults to the page's `thread` / `discussion` prop. */
+  report?: ReportSubject
 }) {
+  const { props } = usePage()
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
-  if (!canManage && !canModerate) return null
+  const subject = report ?? pageSubject(props, noun)
+  const canReport = Boolean(props.user && subject && subject.authorId !== props.user.id)
+
+  if (!canManage && !canModerate && !canReport) return null
 
   const article = noun === 'question' ? 'cette question' : 'cette discussion'
+  const reportDialog = subject && canReport && (
+    <ReportDialog
+      open={reporting}
+      onClose={() => setReporting(false)}
+      target={noun === 'question' ? 'thread' : 'discussion'}
+      id={subject.id}
+    />
+  )
+
+  if (!canManage && !canModerate) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setReporting(true)}
+          aria-haspopup="dialog"
+          aria-label={`Signaler ${article}`}
+          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-sm border border-transparent px-3 text-[14px] font-medium text-muted transition-colors duration-150 hover:border-line-2 hover:text-ink focus-visible:border-ink focus-visible:text-ink focus-visible:shadow-[0_0_0_3px_var(--js)] focus-visible:outline-none active:translate-y-px"
+        >
+          <Flag size={15} strokeWidth={1.75} aria-hidden="true" />
+          <span>Signaler</span>
+        </button>
+        {reportDialog}
+      </>
+    )
+  }
 
   function toggle(action: 'pin' | 'lock') {
     router.post(`${basePath}/${action}`, {}, { preserveScroll: true })
@@ -90,6 +129,17 @@ export function ContentActions({
             </MenuAction>
           </>
         )}
+        {canReport && (
+          <>
+            <MenuDivider />
+            <MenuAction
+              onClick={() => setReporting(true)}
+              icon={<Flag size={15} strokeWidth={1.75} />}
+            >
+              Signaler {article}
+            </MenuAction>
+          </>
+        )}
         {canManage && (
           <>
             <MenuDivider />
@@ -116,6 +166,17 @@ export function ContentActions({
             : 'La discussion et toutes ses réponses disparaîtront définitivement.'
         }
       />
+      {reportDialog}
     </>
   )
+}
+
+/**
+ * The thread / discussion of the current page (forum/show, discussions/show).
+ */
+function pageSubject(props: object, noun: 'question' | 'discussion'): ReportSubject | null {
+  const content = (props as Record<string, unknown>)[noun === 'question' ? 'thread' : 'discussion']
+  if (!content || typeof content !== 'object' || !('id' in content)) return null
+  const { id, author } = content as { id: number; author?: { id: number } | null }
+  return { id, authorId: author?.id ?? null }
 }

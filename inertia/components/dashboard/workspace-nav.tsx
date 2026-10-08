@@ -2,7 +2,9 @@ import { Link, usePage } from '@inertiajs/react'
 import {
   ArrowLeft,
   ArrowUpRight,
+  Bell,
   CircleUserRound,
+  Flag,
   Gauge,
   Hash,
   KeyRound,
@@ -18,10 +20,18 @@ import { cn } from '~/lib/format'
 
 export type WorkspaceVariant = 'member' | 'admin'
 
-type Item = { href: string; label: string; icon: LucideIcon }
+type Item = {
+  href: string
+  label: string
+  icon: LucideIcon
+  count?: number
+  /** Screen-reader suffix of the counter (" non lues" by default). */
+  countLabel?: string
+}
 
 const MEMBER_ITEMS: Item[] = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/settings', label: 'Profil', icon: UserRound },
   { href: '/settings/password', label: 'Mot de passe', icon: KeyRound },
   { href: '/settings/account', label: 'Compte', icon: CircleUserRound },
@@ -29,6 +39,7 @@ const MEMBER_ITEMS: Item[] = [
 
 const ADMIN_ITEMS: Item[] = [
   { href: '/admin', label: 'Vue d’ensemble', icon: Gauge },
+  { href: '/admin/signalements', label: 'Signalements', icon: Flag, countLabel: ' en attente' },
   { href: '/admin/membres', label: 'Membres', icon: Users },
   { href: '/admin/tags', label: 'Tags', icon: Hash },
   { href: '/admin/canaux', label: 'Canaux', icon: MessagesSquare },
@@ -65,6 +76,12 @@ function NavItem({ item, index, active }: { item: Item; index?: number; active: 
           aria-hidden="true"
         />
         <span className={cn(active && 'mark')}>{item.label}</span>
+        {item.count ? (
+          <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-xs bg-js px-1.5 font-mono text-[11px] leading-none font-bold text-js-ink tabular-nums">
+            {item.count > 99 ? '99+' : item.count}
+            <span className="sr-only">{item.countLabel ?? ' non lues'}</span>
+          </span>
+        ) : null}
       </Link>
     </li>
   )
@@ -78,7 +95,19 @@ export function WorkspaceNav({ variant }: { variant: WorkspaceVariant }) {
   const { url, props } = usePage()
   const user = props.user
   const path = url.split('?')[0].replace(/\/$/, '') || '/'
-  const items = variant === 'admin' ? ADMIN_ITEMS : MEMBER_ITEMS
+  const unread = props.unreadNotifications ?? 0
+  // Moderation queue size, on the back-office pages that provide it.
+  const queue = (props as { reportQueueCount?: unknown }).reportQueueCount
+  const items =
+    variant === 'admin'
+      ? ADMIN_ITEMS.map((item) =>
+          item.href === '/admin/signalements' && typeof queue === 'number'
+            ? { ...item, count: queue }
+            : item
+        )
+      : MEMBER_ITEMS.map((item) =>
+          item.href === '/notifications' ? { ...item, count: unread } : item
+        )
 
   return (
     <div className="lg:sticky lg:top-24 lg:py-12">

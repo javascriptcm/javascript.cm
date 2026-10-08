@@ -200,7 +200,7 @@ export class ReplySchema extends BaseModel {
 }
 
 export class ReportSchema extends BaseModel {
-  static $columns = ['articleId', 'createdAt', 'details', 'discussionId', 'id', 'reason', 'replyId', 'reporterId', 'resolvedAt', 'resolvedById', 'status', 'threadId', 'updatedAt'] as const
+  static $columns = ['articleId', 'createdAt', 'details', 'discussionId', 'id', 'reason', 'replyId', 'reporterId', 'resolvedAt', 'resolvedById', 'status', 'targetId', 'targetLabel', 'targetOwnerId', 'targetType', 'threadId', 'updatedAt'] as const
   $columns = ReportSchema.$columns
   @column()
   declare articleId: number | null
@@ -224,6 +224,14 @@ export class ReportSchema extends BaseModel {
   declare resolvedById: number | null
   @column()
   declare status: 'open' | 'resolved' | 'dismissed'
+  @column()
+  declare targetId: number
+  @column()
+  declare targetLabel: string | null
+  @column()
+  declare targetOwnerId: number | null
+  @column()
+  declare targetType: 'article' | 'thread' | 'discussion' | 'reply'
   @column()
   declare threadId: number | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })

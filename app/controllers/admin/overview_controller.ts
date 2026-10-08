@@ -30,7 +30,11 @@ export default class OverviewController {
             (select count(*) from discussions) as discussions,
             (select count(*) from replies) as replies,
             (select count(*) from tags) as tags,
-            (select count(*) from channels) as channels`
+            (select count(*) from channels) as channels,
+            (select count(*) from reports where status = 'open') as reports_open,
+            (select count(*) from (
+              select 1 from reports where status = 'open' group by target_type, target_id
+            ) as queue) as reports_queue`
         )
         .then((result) => result.rows[0]),
       User.query()
@@ -65,7 +69,9 @@ export default class OverviewController {
       | 'discussions'
       | 'replies'
       | 'tags'
-      | 'channels',
+      | 'channels'
+      | 'reports_open'
+      | 'reports_queue',
       number
     >
 

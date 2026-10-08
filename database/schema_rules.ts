@@ -20,6 +20,10 @@ export default {
           tsType: `'open' | 'resolved' | 'dismissed'`,
           decorators: [{ name: '@column' }],
         },
+        target_type: {
+          tsType: `'article' | 'thread' | 'discussion' | 'reply'`,
+          decorators: [{ name: '@column' }],
+        },
       },
     },
     users: {

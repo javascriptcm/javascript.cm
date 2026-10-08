@@ -11,10 +11,27 @@ const OverviewController = () => import('#controllers/admin/overview_controller'
 const AdminMembersController = () => import('#controllers/admin/members_controller')
 const AdminTagsController = () => import('#controllers/admin/tags_controller')
 const AdminChannelsController = () => import('#controllers/admin/channels_controller')
+const AdminReportsController = () => import('#controllers/admin/reports_controller')
+
+const REPORT_TARGET = /^(article|thread|discussion|reply)$/
 
 router
   .group(() => {
     router.get('/', [OverviewController, 'index']).as('admin.index')
+
+    router.get('signalements', [AdminReportsController, 'index']).as('admin.reports.index')
+    router
+      .post('signalements/:target/:id/traiter', [AdminReportsController, 'resolve'])
+      .as('admin.reports.resolve')
+      .where('target', REPORT_TARGET)
+    router
+      .post('signalements/:target/:id/ignorer', [AdminReportsController, 'dismiss'])
+      .as('admin.reports.dismiss')
+      .where('target', REPORT_TARGET)
+    router
+      .delete('signalements/:target/:id/contenu', [AdminReportsController, 'destroyContent'])
+      .as('admin.reports.destroy')
+      .where('target', REPORT_TARGET)
 
     router.get('membres', [AdminMembersController, 'index']).as('admin.members.index')
     router

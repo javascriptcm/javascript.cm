@@ -13,6 +13,7 @@ import { Tag } from '~/components/ui/tag'
 import { ReplyList } from '~/components/replies/reply-list'
 import { ReplyForm } from '~/components/replies/reply-form'
 import { AuthorCard, LikeButton, ShareLinks } from '~/components/articles/article-aside'
+import { ReportButton } from '~/components/reports/report-dialog'
 import { formatDate, formatShortDate, plural } from '~/lib/format'
 
 type Article = Data.Article.Variants['forDetail']
@@ -270,19 +271,24 @@ export default function ArticleShow({
         <div className="shell mt-10 grid gap-14 sm:mt-14 lg:grid-cols-12 lg:gap-12">
           <div className="min-w-0 lg:col-span-8">
             <Prose html={article.bodyHtml} className="[overflow-wrap:anywhere]" />
-            <p className="label mt-12 border-t border-line pt-5">
-              Publié par{' '}
-              <Link href={`/@${author.username}`} className="text-ink link-draw">
-                {author.displayName}
-              </Link>
-              {article.publishedAt && !isDraft && <> le {formatDate(article.publishedAt)}</>}
-              {article.updatedAt &&
-                article.publishedAt &&
-                !isDraft &&
-                formatDate(article.updatedAt) !== formatDate(article.publishedAt) && (
-                  <> · mis à jour le {formatDate(article.updatedAt)}</>
-                )}
-            </p>
+            <div className="mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3 border-t border-line pt-5">
+              <p className="label">
+                Publié par{' '}
+                <Link href={`/@${author.username}`} className="text-ink link-draw">
+                  {author.displayName}
+                </Link>
+                {article.publishedAt && !isDraft && <> le {formatDate(article.publishedAt)}</>}
+                {article.updatedAt &&
+                  article.publishedAt &&
+                  !isDraft &&
+                  formatDate(article.updatedAt) !== formatDate(article.publishedAt) && (
+                    <> · mis à jour le {formatDate(article.updatedAt)}</>
+                  )}
+              </p>
+              {user && user.id !== author.id && !isDraft && (
+                <ReportButton target="article" id={article.id} label="Signaler l’article" />
+              )}
+            </div>
           </div>
 
           <aside
