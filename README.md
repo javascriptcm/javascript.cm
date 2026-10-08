@@ -79,6 +79,7 @@ Le serveur exécute `docker-compose.yml` (application + PostgreSQL) ; Caddy, ins
 - Chaque push sur la branche `staging` lance le workflow GitHub Actions _Staging_ : typecheck + build, puis déploiement par SSH. La clé utilisée est restreinte côté serveur à une seule commande (`deploy/deploy.sh`).
 - Au démarrage, le conteneur applique les migrations et les seeders idempotents. Le contenu de démonstration (membres et publications fictifs) n’est inséré en production que si `SEED_DEMO=true`.
 - Déploiement manuel sur le serveur : `./deploy/deploy.sh staging`.
+- Sauvegardes : `deploy/backup.sh` (dump PostgreSQL compressé, rotation 14 jours dans `~/backups/jscm`) est lancé chaque nuit par le timer systemd `jscm-backup` (`deploy/jscm-backup.{service,timer}`). Restauration : `docker compose exec -T db pg_restore -U <user> -d <base> --clean --if-exists < fichier.dump`.
 
 ## Contribuer
 
