@@ -1,3 +1,4 @@
+import { markSubjectRead } from '#services/notifications'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
@@ -153,6 +154,8 @@ export default class ThreadsController {
       .preload('author')
       .preload('channel')
       .firstOrFail()
+
+    if (viewer) await markSubjectRead(viewer.id, { threadId: thread.id })
 
     if (viewer?.id !== thread.userId && isFirstView(session, `t${thread.id}`)) {
       await db.from('threads').where('id', thread.id).increment('views_count', 1)

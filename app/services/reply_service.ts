@@ -6,6 +6,7 @@ import Thread from '#models/thread'
 import Discussion from '#models/discussion'
 import type User from '#models/user'
 import { renderMarkdown } from '#services/markdown'
+import { notifyReply } from '#services/notifications'
 
 export type ReplyParent =
   | { type: 'thread'; id: number }
@@ -20,7 +21,7 @@ const COLUMN = { thread: 'threadId', discussion: 'discussionId', article: 'artic
 export async function createReply(parent: ReplyParent, author: User, body: string) {
   // Render first: never hold a transaction open while markdown renders.
   const bodyHtml = await renderMarkdown(body)
-  return db.transaction(async (trx) => {
+  const created = await db.transaction(async (trx) => {
     const reply = new Reply().useTransaction(trx)
     reply.userId = author.id
     reply[COLUMN[parent.type]] = parent.id
@@ -39,6 +40,10 @@ export async function createReply(parent: ReplyParent, author: User, body: strin
     }
     return reply
   })
+
+  // Once committed: notify the author and previous participants (never throws).
+  await notifyReply(parent, created)
+  return created
 }
 
 export async function updateReply(reply: Reply, body: string) {

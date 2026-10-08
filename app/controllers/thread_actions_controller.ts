@@ -5,6 +5,7 @@ import Reply from '#models/reply'
 import { replyValidator } from '#validators/reply_validator'
 import { solutionValidator } from '#validators/thread_validator'
 import { createReply } from '#services/reply_service'
+import { notifySolution } from '#services/notifications'
 import { THREAD_REPLIES_PER_PAGE } from '#controllers/threads_controller'
 
 /**
@@ -58,6 +59,7 @@ export default class ThreadActionsController {
 
     // Plain update: accepting an answer is not an edit of the question.
     await db.from('threads').where('id', thread.id).update({ solution_reply_id: reply.id })
+    await notifySolution(thread.id, reply, auth.user!.id)
     session.flash('success', 'Réponse marquée comme solution.')
     return response.redirect().back()
   }

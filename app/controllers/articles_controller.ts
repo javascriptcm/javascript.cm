@@ -1,3 +1,4 @@
+import { markSubjectRead } from '#services/notifications'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
@@ -197,6 +198,7 @@ export default class ArticlesController {
       .firstOrFail()
 
     assertVisible(article, viewer)
+    if (viewer) await markSubjectRead(viewer.id, { articleId: article.id })
 
     /**
      * Count one view per session (likes and comments redirect back here),
