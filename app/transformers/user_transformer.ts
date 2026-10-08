@@ -14,7 +14,8 @@ export default class UserTransformer extends BaseTransformer<User> {
   }
 
   /**
-   * Public profile page.
+   * Public profile page. The CV is never part of it: the page receives a
+   * separate "cv" prop computed for the viewer (see ProfileController).
    */
   forProfile() {
     return {
@@ -27,7 +28,27 @@ export default class UserTransformer extends BaseTransformer<User> {
         'twitterUsername',
         'linkedinUsername',
         'createdAt',
+        'headline',
+        'availability',
+        'portfolioUrl',
       ]),
+      skills: this.resource.skills ?? [],
+      links: this.resource.links ?? [],
+    }
+  }
+
+  /**
+   * The owner's CV settings: metadata only, never the storage key.
+   */
+  forCv() {
+    const hasCv = Boolean(this.resource.cvPath)
+    return {
+      hasCv,
+      visibility: this.resource.cvVisibility ?? 'members',
+      originalName: hasCv ? this.resource.cvOriginalName : null,
+      size: hasCv ? this.resource.cvSize : null,
+      uploadedAt: hasCv ? this.resource.cvUploadedAt : null,
+      url: hasCv ? `/@${this.resource.username}/cv` : null,
     }
   }
 
@@ -51,7 +72,8 @@ export default class UserTransformer extends BaseTransformer<User> {
   forDirectory() {
     return {
       ...this.toObject(),
-      ...this.pick(this.resource, ['bio', 'location', 'createdAt']),
+      ...this.pick(this.resource, ['bio', 'location', 'createdAt', 'headline', 'availability']),
+      skills: this.resource.skills ?? [],
       articlesCount: Number(this.resource.$extras.articles_count ?? 0),
       threadsCount: Number(this.resource.$extras.threads_count ?? 0),
       repliesCount: Number(this.resource.$extras.replies_count ?? 0),

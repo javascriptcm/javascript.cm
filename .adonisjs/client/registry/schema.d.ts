@@ -811,6 +811,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['destroyAccount']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'settings.cv': {
+    methods: ["GET","HEAD"]
+    pattern: '/settings/cv'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['show']>>>
+    }
+  }
+  'settings.cv.store': {
+    methods: ["POST"]
+    pattern: '/settings/cv'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/settings_validator').cvUploadValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/settings_validator').cvUploadValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'settings.cv.destroy': {
+    methods: ["DELETE"]
+    pattern: '/settings/cv'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['destroy']>>>
+    }
+  }
+  'settings.cv.visibility': {
+    methods: ["PUT"]
+    pattern: '/settings/cv/visibility'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/settings_validator').cvVisibilityValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/settings_validator').cvVisibilityValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['updateVisibility']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['updateVisibility']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'profile.show': {
     methods: ["GET","HEAD"]
     pattern: '/:username'
@@ -821,6 +869,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['show']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['show']>>>
+    }
+  }
+  'profile.cv': {
+    methods: ["GET","HEAD"]
+    pattern: '/:username/cv'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { username: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['download']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cv_controller').default['download']>>>
     }
   }
   'admin.index': {

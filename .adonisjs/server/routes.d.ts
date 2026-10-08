@@ -71,7 +71,12 @@ export type ScannedRoutes = {
     'settings.password.update': { paramsTuple?: []; params?: {} }
     'settings.account': { paramsTuple?: []; params?: {} }
     'settings.account.destroy': { paramsTuple?: []; params?: {} }
+    'settings.cv': { paramsTuple?: []; params?: {} }
+    'settings.cv.store': { paramsTuple?: []; params?: {} }
+    'settings.cv.destroy': { paramsTuple?: []; params?: {} }
+    'settings.cv.visibility': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
+    'profile.cv': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
     'admin.reports.index': { paramsTuple?: []; params?: {} }
     'admin.reports.resolve': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
@@ -122,7 +127,9 @@ export type ScannedRoutes = {
     'settings.profile': { paramsTuple?: []; params?: {} }
     'settings.password': { paramsTuple?: []; params?: {} }
     'settings.account': { paramsTuple?: []; params?: {} }
+    'settings.cv': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
+    'profile.cv': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
     'admin.reports.index': { paramsTuple?: []; params?: {} }
     'admin.members.index': { paramsTuple?: []; params?: {} }
@@ -161,7 +168,9 @@ export type ScannedRoutes = {
     'settings.profile': { paramsTuple?: []; params?: {} }
     'settings.password': { paramsTuple?: []; params?: {} }
     'settings.account': { paramsTuple?: []; params?: {} }
+    'settings.cv': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
+    'profile.cv': { paramsTuple: [ParamValue]; params: {'username': ParamValue} }
     'admin.index': { paramsTuple?: []; params?: {} }
     'admin.reports.index': { paramsTuple?: []; params?: {} }
     'admin.members.index': { paramsTuple?: []; params?: {} }
@@ -193,6 +202,7 @@ export type ScannedRoutes = {
     'notifications.read_all': { paramsTuple?: []; params?: {} }
     'notifications.read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'reports.store': { paramsTuple?: []; params?: {} }
+    'settings.cv.store': { paramsTuple?: []; params?: {} }
     'admin.reports.resolve': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.reports.dismiss': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.members.ban': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -206,6 +216,7 @@ export type ScannedRoutes = {
     'discussions.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'settings.profile.update': { paramsTuple?: []; params?: {} }
     'settings.password.update': { paramsTuple?: []; params?: {} }
+    'settings.cv.visibility': { paramsTuple?: []; params?: {} }
     'admin.members.role': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.tags.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.channels.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -217,6 +228,7 @@ export type ScannedRoutes = {
     'forum.solution.destroy': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'discussions.destroy': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'settings.account.destroy': { paramsTuple?: []; params?: {} }
+    'settings.cv.destroy': { paramsTuple?: []; params?: {} }
     'admin.reports.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'target': ParamValue,'id': ParamValue} }
     'admin.members.unban': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

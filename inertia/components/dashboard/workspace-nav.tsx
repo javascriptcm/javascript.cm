@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   Bell,
   CircleUserRound,
+  FileText,
   Flag,
   Gauge,
   Hash,
@@ -33,6 +34,7 @@ const MEMBER_ITEMS: Item[] = [
   { href: '/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/settings', label: 'Profil', icon: UserRound },
+  { href: '/settings/cv', label: 'CV', icon: FileText },
   { href: '/settings/password', label: 'Mot de passe', icon: KeyRound },
   { href: '/settings/account', label: 'Compte', icon: CircleUserRound },
 ]

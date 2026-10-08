@@ -49,8 +49,14 @@ const bodyParserConfig = defineConfig({
    */
   multipart: {
     /**
-     * The site has no file upload: never write multipart bodies to disk
-     * (they would be stored before CSRF validation and never cleaned up).
+     * Never write multipart bodies to disk automatically: the bodyparser
+     * runs before the session, CSRF and auth middleware, so anonymous
+     * requests could fill the temporary directory (files never cleaned up).
+     *
+     * The only upload of the site, the CV ("POST /settings/cv"), streams its
+     * body itself inside CvController.store, i.e. after auth, CSRF and
+     * throttling, and deletes its temporary files when done. Every other
+     * route ignores multipart bodies (no fields, no files).
      */
     autoProcess: false,
 
@@ -60,14 +66,16 @@ const bodyParserConfig = defineConfig({
     convertEmptyStringsToNull: true,
 
     /**
-     * Routes where multipart processing is handled manually.
+     * Routes where multipart processing is handled manually (kept in sync
+     * so that the CV route stays manual even if autoProcess is enabled).
      */
-    processManually: [],
+    processManually: ['/settings/cv'],
 
     /**
-     * Maximum accepted payload size for multipart requests.
+     * Maximum accepted payload size for multipart requests: a 5 MB PDF plus
+     * the multipart envelope (Caddy allows 6 MB on /settings/cv only).
      */
-    limit: '20mb',
+    limit: '6mb',
 
     /**
      * Content types handled by the multipart parser.

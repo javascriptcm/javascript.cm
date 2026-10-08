@@ -6,6 +6,8 @@
 
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
+import { jsonArrayColumn } from '#database/json_column'
+import type { ProfileLink } from '#database/json_column'
 
 export class ArticleTagSchema extends BaseModel {
   static $columns = ['articleId', 'tagId'] as const
@@ -291,10 +293,12 @@ export class ThreadSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['appleId', 'avatarUrl', 'bannedAt', 'bio', 'createdAt', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'googleId', 'id', 'linkedinUsername', 'location', 'name', 'password', 'role', 'sessionVersion', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
+  static $columns = ['appleId', 'availability', 'avatarUrl', 'bannedAt', 'bio', 'createdAt', 'cvOriginalName', 'cvPath', 'cvSize', 'cvUploadedAt', 'cvVisibility', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'googleId', 'headline', 'id', 'linkedinUsername', 'links', 'location', 'name', 'password', 'portfolioUrl', 'role', 'sessionVersion', 'skills', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
   $columns = UserSchema.$columns
   @column()
   declare appleId: string | null
+  @column()
+  declare availability: 'open_to_work' | 'freelance' | 'hiring' | null
   @column()
   declare avatarUrl: string | null
   @column.dateTime()
@@ -303,6 +307,16 @@ export class UserSchema extends BaseModel {
   declare bio: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare cvOriginalName: string | null
+  @column({ serializeAs: null })
+  declare cvPath: string | null
+  @column()
+  declare cvSize: number | null
+  @column.dateTime()
+  declare cvUploadedAt: DateTime | null
+  @column()
+  declare cvVisibility: 'public' | 'members' | 'private'
   @column()
   declare email: string
   @column.dateTime()
@@ -313,10 +327,14 @@ export class UserSchema extends BaseModel {
   declare githubUsername: string | null
   @column()
   declare googleId: string | null
+  @column()
+  declare headline: string | null
   @column({ isPrimary: true })
   declare id: number
   @column()
   declare linkedinUsername: string | null
+  @jsonArrayColumn()
+  declare links: ProfileLink[]
   @column()
   declare location: string | null
   @column()
@@ -324,9 +342,13 @@ export class UserSchema extends BaseModel {
   @column({ serializeAs: null })
   declare password: string | null
   @column()
+  declare portfolioUrl: string | null
+  @column()
   declare role: 'member' | 'moderator' | 'admin'
   @column()
   declare sessionVersion: number
+  @jsonArrayColumn()
+  declare skills: string[]
   @column()
   declare twitterUsername: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })

@@ -12,6 +12,9 @@ export const members: DemoMember[] = [
     role: 'moderator',
     joinedDaysAgo: 238,
     bio: 'Lead front-end dans une fintech à Douala. Je modère le forum et j’anime les meetups JS du Littoral. Accessibilité, design systems et revues de code bienveillantes.',
+    headline: 'Lead front-end · fintech · Douala',
+    availability: 'hiring',
+    skills: ['React', 'TypeScript', 'Accessibilité', 'Design systems', 'Storybook'],
   },
   {
     username: 'junior-mbarga',
@@ -19,6 +22,9 @@ export const members: DemoMember[] = [
     location: 'Yaoundé',
     joinedDaysAgo: 231,
     bio: 'Développeur backend Node.js et AdonisJS. Je construis des API pour des PME de Yaoundé. PostgreSQL, tests d’intégration et messages de commit lisibles.',
+    headline: 'Développeur backend Node.js / AdonisJS · Yaoundé',
+    availability: 'open_to_work',
+    skills: ['Node.js', 'AdonisJS', 'PostgreSQL', 'TypeScript', 'Docker'],
   },
   {
     username: 'christelle_k',
@@ -26,6 +32,8 @@ export const members: DemoMember[] = [
     location: 'Bafoussam',
     joinedDaysAgo: 220,
     bio: 'Formatrice JavaScript et TypeScript. J’explique les concepts avec des exemples du quotidien : la tontine, le marché, le taxi-moto. Persuadée que tout le monde peut apprendre à coder.',
+    headline: 'Formatrice JavaScript & TypeScript · Bafoussam',
+    skills: ['JavaScript', 'TypeScript', 'Pédagogie', 'Vue.js'],
   },
   {
     username: 'yves_fotso',
@@ -33,6 +41,9 @@ export const members: DemoMember[] = [
     location: 'Douala',
     joinedDaysAgo: 205,
     bio: 'Développeur full-stack freelance. Boutiques en ligne, intégrations de paiement et API pour des clients au Cameroun et en Europe. Café serré, factures à l’heure.',
+    headline: 'Développeur full-stack freelance · e-commerce et paiements',
+    availability: 'freelance',
+    skills: ['Next.js', 'React', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'Stripe'],
   },
   {
     username: 'nfor_ngwa',
@@ -40,6 +51,9 @@ export const members: DemoMember[] = [
     location: 'Bamenda',
     joinedDaysAgo: 190,
     bio: 'Développeur mobile React Native et Expo. Bilingue : je réponds en français ou en anglais. J’aime les apps qui fonctionnent même quand le réseau ne suit pas.',
+    headline: 'Développeur mobile React Native · Bamenda',
+    availability: 'open_to_work',
+    skills: ['React Native', 'Expo', 'TypeScript', 'SQLite'],
   },
   {
     username: 'hamadou-bello',
@@ -47,6 +61,9 @@ export const members: DemoMember[] = [
     location: 'Garoua',
     joinedDaysAgo: 176,
     bio: 'Full-stack Vue et Node.js en télétravail depuis Garoua. Huit ans de code, des dizaines d’entretiens passés des deux côtés de la table.',
+    headline: 'Full-stack Vue / Node.js en télétravail · Garoua',
+    availability: 'freelance',
+    skills: ['Vue.js', 'Nuxt', 'Node.js', 'MongoDB', 'Docker'],
   },
   {
     username: 'mireille-ondoa',
@@ -54,6 +71,8 @@ export const members: DemoMember[] = [
     location: 'Yaoundé',
     joinedDaysAgo: 160,
     bio: 'Développeuse Angular dans une compagnie d’assurance à Yaoundé, React sur mes projets perso. Je migre des formulaires géants et j’aime les signals.',
+    headline: 'Développeuse Angular · assurance · Yaoundé',
+    skills: ['Angular', 'RxJS', 'TypeScript', 'React'],
   },
   {
     username: 'lionel_tchak',
@@ -61,6 +80,8 @@ export const members: DemoMember[] = [
     location: 'Douala',
     joinedDaysAgo: 141,
     bio: 'Performance web et e-commerce. Je traque les kilo-octets inutiles pour que les pages s’affichent vite sur un forfait 3G. Next.js, Lighthouse, images bien dimensionnées.',
+    headline: 'Performance web & e-commerce · Next.js',
+    skills: ['Next.js', 'React', 'Performance web', 'Lighthouse', 'Node.js'],
   },
   {
     username: 'ebai-tabe',
@@ -68,6 +89,9 @@ export const members: DemoMember[] = [
     location: 'Buea',
     joinedDaysAgo: 122,
     bio: 'Étudiant en génie logiciel à Buea, stagiaire développeur. J’écris des tests avant d’écrire des bugs (enfin, j’essaie).',
+    headline: 'Étudiant en génie logiciel · stagiaire développeur',
+    availability: 'open_to_work',
+    skills: ['JavaScript', 'React', 'Jest', 'Git'],
   },
   {
     username: 'patrice-ekambi',
@@ -75,6 +99,9 @@ export const members: DemoMember[] = [
     location: 'Kribi',
     joinedDaysAgo: 97,
     bio: 'DevOps et backend, en télétravail face à la mer. Docker, CI/CD, VPS bien configurés, et un onduleur qui a déjà sauvé plusieurs déploiements.',
+    headline: 'DevOps & backend · Docker, CI/CD · Kribi',
+    availability: 'freelance',
+    skills: ['Docker', 'GitHub Actions', 'Node.js', 'Linux', 'PostgreSQL'],
   },
   {
     username: 'grace-enow',
@@ -82,6 +109,9 @@ export const members: DemoMember[] = [
     location: 'Limbé',
     joinedDaysAgo: 58,
     bio: 'Reconversion réussie : ancienne comptable, développeuse React junior depuis la fin de mon bootcamp. Je pose beaucoup de questions et je partage ce que j’apprends.',
+    headline: 'Développeuse React junior · Limbé',
+    availability: 'open_to_work',
+    skills: ['React', 'JavaScript', 'HTML/CSS', 'Tailwind CSS'],
   },
   {
     username: 'aissatou-oumarou',
@@ -89,5 +119,8 @@ export const members: DemoMember[] = [
     location: 'Yaoundé',
     joinedDaysAgo: 31,
     bio: 'Originaire de Maroua, étudiante en informatique à Yaoundé. J’apprends JavaScript le soir et je vise mon premier stage.',
+    headline: 'Étudiante en informatique · Yaoundé',
+    availability: 'open_to_work',
+    skills: ['JavaScript', 'HTML/CSS', 'Python'],
   },
 ]

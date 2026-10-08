@@ -42,6 +42,7 @@ declare module '@adonisjs/inertia/types' {
     'profile/show': ExtractProps<(typeof import('../../inertia/pages/profile/show.tsx'))['default']>
     'search/index': ExtractProps<(typeof import('../../inertia/pages/search/index.tsx'))['default']>
     'settings/account': ExtractProps<(typeof import('../../inertia/pages/settings/account.tsx'))['default']>
+    'settings/cv': ExtractProps<(typeof import('../../inertia/pages/settings/cv.tsx'))['default']>
     'settings/password': ExtractProps<(typeof import('../../inertia/pages/settings/password.tsx'))['default']>
     'settings/profile': ExtractProps<(typeof import('../../inertia/pages/settings/profile.tsx'))['default']>
   }

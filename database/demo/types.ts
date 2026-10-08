@@ -16,6 +16,11 @@ export interface DemoMember {
   location: string
   /** ≤ 280 characters */
   bio: string
+  /** ≤ 120 characters */
+  headline?: string
+  availability?: 'open_to_work' | 'freelance' | 'hiring'
+  /** ≤ 12 skills of 2–30 characters */
+  skills?: string[]
   role?: 'member' | 'moderator'
   /** Account creation, in days before the seed runs. */
   joinedDaysAgo: number

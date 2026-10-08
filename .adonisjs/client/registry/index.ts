@@ -408,11 +408,41 @@ const routes = {
     tokens: [{"old":"/settings/account","type":0,"val":"settings","end":""},{"old":"/settings/account","type":0,"val":"account","end":""}],
     types: placeholder as Registry['settings.account.destroy']['types'],
   },
+  'settings.cv': {
+    methods: ["GET","HEAD"],
+    pattern: '/settings/cv',
+    tokens: [{"old":"/settings/cv","type":0,"val":"settings","end":""},{"old":"/settings/cv","type":0,"val":"cv","end":""}],
+    types: placeholder as Registry['settings.cv']['types'],
+  },
+  'settings.cv.store': {
+    methods: ["POST"],
+    pattern: '/settings/cv',
+    tokens: [{"old":"/settings/cv","type":0,"val":"settings","end":""},{"old":"/settings/cv","type":0,"val":"cv","end":""}],
+    types: placeholder as Registry['settings.cv.store']['types'],
+  },
+  'settings.cv.destroy': {
+    methods: ["DELETE"],
+    pattern: '/settings/cv',
+    tokens: [{"old":"/settings/cv","type":0,"val":"settings","end":""},{"old":"/settings/cv","type":0,"val":"cv","end":""}],
+    types: placeholder as Registry['settings.cv.destroy']['types'],
+  },
+  'settings.cv.visibility': {
+    methods: ["PUT"],
+    pattern: '/settings/cv/visibility',
+    tokens: [{"old":"/settings/cv/visibility","type":0,"val":"settings","end":""},{"old":"/settings/cv/visibility","type":0,"val":"cv","end":""},{"old":"/settings/cv/visibility","type":0,"val":"visibility","end":""}],
+    types: placeholder as Registry['settings.cv.visibility']['types'],
+  },
   'profile.show': {
     methods: ["GET","HEAD"],
     pattern: '/:username',
     tokens: [{"old":"/:username","type":1,"val":"username","end":""}],
     types: placeholder as Registry['profile.show']['types'],
+  },
+  'profile.cv': {
+    methods: ["GET","HEAD"],
+    pattern: '/:username/cv',
+    tokens: [{"old":"/:username/cv","type":1,"val":"username","end":""},{"old":"/:username/cv","type":0,"val":"cv","end":""}],
+    types: placeholder as Registry['profile.cv']['types'],
   },
   'admin.index': {
     methods: ["GET","HEAD"],

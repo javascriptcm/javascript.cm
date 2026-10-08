@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react'
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { MapPin, Search, X } from 'lucide-react'
 import type { Data } from '@generated/data'
 import { Seo } from '~/components/seo'
@@ -9,15 +9,30 @@ import { Pagination, type PaginationMeta } from '~/components/ui/pagination'
 import { Avatar } from '~/components/ui/avatar'
 import { Button, ButtonLink } from '~/components/ui/button'
 import { RoleBadge } from '~/components/profile/role-badge'
+import {
+  AVAILABILITY_LABELS,
+  AVAILABILITY_SHORT_LABELS,
+  AvailabilityBadge,
+  type Availability,
+} from '~/components/profile/availability'
 import { cn, formatNumber, plural } from '~/lib/format'
 
 type Member = Data.User.Variants['forDirectory']
 type Sort = 'recents' | 'actifs'
 
+type Filters = {
+  q: string
+  sort: Sort
+  competence: string
+  disponibilite: Availability | ''
+  ville: string
+}
+
 type Props = {
   members: { data: Member[]; metadata: PaginationMeta }
-  filters: { q: string; sort: Sort }
+  filters: Filters
   totalMembers: number
+  popularSkills: { name: string; total: number }[]
 }
 
 const SORTS: { value: Sort; label: string }[] = [
@@ -25,11 +40,21 @@ const SORTS: { value: Sort; label: string }[] = [
   { value: 'actifs', label: 'Les plus actifs' },
 ]
 
+const AVAILABILITIES: (Availability | '')[] = ['', 'open_to_work', 'freelance', 'hiring']
+
 const sinceFmt = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'numeric' })
 
-function href(filters: { q: string; sort: Sort }) {
+const sameSkill = (a: string, b: string) => a.toLocaleLowerCase('fr') === b.toLocaleLowerCase('fr')
+
+/**
+ * Directory URL for a set of filters (page reset to 1).
+ */
+function href(filters: Filters) {
   const params = new URLSearchParams()
   if (filters.q) params.set('q', filters.q)
+  if (filters.competence) params.set('competence', filters.competence)
+  if (filters.disponibilite) params.set('disponibilite', filters.disponibilite)
+  if (filters.ville) params.set('ville', filters.ville)
   if (filters.sort !== 'recents') params.set('sort', filters.sort)
   const qs = params.toString()
   return qs ? `/membres?${qs}` : '/membres'
@@ -48,7 +73,51 @@ function Counter({ value, label, title }: { value: number; label: string; title:
   )
 }
 
-function MemberRow({ member, index }: { member: Member; index: number }) {
+function FilterPill({
+  href: target,
+  active,
+  children,
+}: {
+  href: string
+  active: boolean
+  children: ReactNode
+}) {
+  return (
+    <Link
+      href={target}
+      aria-current={active ? 'page' : undefined}
+      preserveScroll
+      className={cn(
+        'inline-flex h-9 shrink-0 items-center rounded-sm border px-3 font-mono text-[12px] font-medium tracking-[0.06em] uppercase transition-colors duration-150',
+        active
+          ? 'border-ink bg-js text-js-ink'
+          : 'border-line-2 text-ink-2 hover:border-ink hover:text-ink'
+      )}
+    >
+      {children}
+    </Link>
+  )
+}
+
+function MemberRow({
+  member,
+  index,
+  competence,
+}: {
+  member: Member
+  index: number
+  competence: string
+}) {
+  // The skill being filtered on comes first, then the member's own order.
+  const skills = competence
+    ? [
+        ...member.skills.filter((s) => sameSkill(s, competence)),
+        ...member.skills.filter((s) => !sameSkill(s, competence)),
+      ]
+    : member.skills
+  const shown = skills.slice(0, 3)
+  const more = skills.length - shown.length
+
   return (
     <li className="border-t border-line first:border-t-0">
       <article className="group relative grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 py-5 sm:grid-cols-[2.75rem_auto_minmax(0,1fr)] sm:gap-x-5 lg:grid-cols-[2.75rem_auto_minmax(0,1fr)_11rem_13.5rem] lg:items-center">
@@ -69,12 +138,48 @@ function MemberRow({ member, index }: { member: Member; index: number }) {
               {member.displayName}
             </Link>
             <RoleBadge role={member.role} />
+            <AvailabilityBadge availability={member.availability} className="relative" />
           </h2>
           <p className="mt-0.5 font-mono text-[13px] text-muted">@{member.username}</p>
-          {member.bio ? (
+          {member.headline ? (
+            <p className="mt-1.5 line-clamp-2 text-[15px] font-medium text-ink sm:line-clamp-1">
+              {member.headline}
+            </p>
+          ) : member.bio ? (
             <p className="mt-1.5 line-clamp-1 text-[15px] text-ink-2">{member.bio}</p>
           ) : (
-            <p className="mt-1.5 text-[15px] text-muted/80 italic">Pas encore de bio.</p>
+            <p className="mt-1.5 text-[15px] text-muted/80 italic">Pas encore de présentation.</p>
+          )}
+          {shown.length > 0 && (
+            <ul
+              className="relative mt-2.5 flex flex-wrap items-center gap-1.5"
+              aria-label="Compétences"
+            >
+              {shown.map((skill) => {
+                const active = Boolean(competence) && sameSkill(skill, competence)
+                return (
+                  <li key={skill}>
+                    <Link
+                      href={`/membres?competence=${encodeURIComponent(skill)}`}
+                      className={cn(
+                        'inline-flex h-6 items-center rounded-xs border px-1.5 text-[12.5px] font-medium transition-colors duration-150',
+                        active
+                          ? 'border-ink bg-js text-js-ink'
+                          : 'border-line-2 text-ink-2 hover:border-ink hover:bg-js hover:text-js-ink'
+                      )}
+                    >
+                      {skill}
+                    </Link>
+                  </li>
+                )
+              })}
+              {more > 0 && (
+                <li className="font-mono text-[12px] text-muted">
+                  +{more}
+                  <span className="sr-only"> autres compétences</span>
+                </li>
+              )}
+            </ul>
           )}
         </div>
 
@@ -94,7 +199,7 @@ function MemberRow({ member, index }: { member: Member; index: number }) {
               —
             </p>
           )}
-          <p className="label normal-case tracking-normal lg:mt-1">
+          <p className="label tracking-normal normal-case lg:mt-1">
             depuis {member.createdAt ? sinceFmt.format(new Date(member.createdAt)) : '—'}
           </p>
         </div>
@@ -109,30 +214,73 @@ function MemberRow({ member, index }: { member: Member; index: number }) {
   )
 }
 
-export default function MembersIndex({ members, filters, totalMembers }: Props) {
-  const [q, setQ] = useState(filters.q)
-  // Keep the search box in sync when the URL changes (back button, "Effacer").
-  const [syncedQ, setSyncedQ] = useState(filters.q)
-  if (filters.q !== syncedQ) {
-    setSyncedQ(filters.q)
-    setQ(filters.q)
+const inputClasses =
+  'h-11 w-full rounded-sm border border-line-2 bg-card px-3.5 text-[15px] text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-muted/80 focus:border-ink focus:shadow-[0_0_0_3px_var(--js)] focus:outline-none [&::-webkit-search-cancel-button]:hidden'
+
+export default function MembersIndex({ members, filters, totalMembers, popularSkills }: Props) {
+  const [draft, setDraft] = useState({
+    q: filters.q,
+    competence: filters.competence,
+    ville: filters.ville,
+  })
+  // Keep the inputs in sync when the URL changes (back button, "Effacer").
+  const [synced, setSynced] = useState(filters)
+  if (
+    filters.q !== synced.q ||
+    filters.competence !== synced.competence ||
+    filters.ville !== synced.ville
+  ) {
+    setSynced(filters)
+    setDraft({ q: filters.q, competence: filters.competence, ville: filters.ville })
   }
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    router.get(href({ q: q.trim(), sort: filters.sort }), {}, { preserveState: true })
+    router.get(
+      href({
+        ...filters,
+        q: draft.q.trim(),
+        competence: draft.competence.trim(),
+        ville: draft.ville.trim(),
+      }),
+      {},
+      { preserveState: true }
+    )
   }
 
   const meta = members.metadata
   const offset = (meta.currentPage - 1) * meta.perPage
+  const filtered = Boolean(
+    filters.q || filters.competence || filters.disponibilite || filters.ville
+  )
+
+  type ActiveFilter = { key: 'q' | 'competence' | 'disponibilite' | 'ville'; label: ReactNode }
+  const active: ActiveFilter[] = []
+  if (filters.q) active.push({ key: 'q', label: <>« {filters.q} »</> })
+  if (filters.competence) {
+    active.push({ key: 'competence', label: <>compétence « {filters.competence} »</> })
+  }
+  if (filters.disponibilite) {
+    active.push({
+      key: 'disponibilite',
+      label: AVAILABILITY_LABELS[filters.disponibilite].toLocaleLowerCase('fr'),
+    })
+  }
+  if (filters.ville) active.push({ key: 'ville', label: <>ville « {filters.ville} »</> })
+
+  const title = filters.competence
+    ? `Membres — ${filters.competence}`
+    : filters.q
+      ? `Membres — « ${filters.q} »`
+      : 'Les membres'
 
   return (
     <>
       <Seo
-        title={filters.q ? `Membres — « ${filters.q} »` : 'Les membres'}
+        title={title}
         description={`L’annuaire des ${formatNumber(totalMembers)} membres de JavaScript Cameroun : développeuses et développeurs JavaScript, TypeScript, React, Node.js du 237.`}
         path="/membres"
-        noindex={Boolean(filters.q) || meta.currentPage > 1}
+        noindex={filtered || meta.currentPage > 1}
       />
 
       <PageHeader
@@ -146,14 +294,19 @@ export default function MembersIndex({ members, filters, totalMembers }: Props) 
             Les gens du <span className="mark">237</span>.
           </>
         }
-        lead="Celles et ceux qui écrivent, demandent, répondent. Trouvez une personne, découvrez ce qu’elle publie, apprenez de ses réponses."
+        lead="Celles et ceux qui écrivent, demandent, répondent — et qui recrutent. Trouvez une personne par son nom, ses compétences, sa ville ou sa disponibilité."
       >
-        <div className="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <form role="search" onSubmit={submit} className="flex w-full max-w-xl gap-2">
-            <label htmlFor="member-search" className="sr-only">
-              Chercher un membre
+        <form
+          role="search"
+          aria-label="Chercher un membre"
+          onSubmit={submit}
+          className="mt-10 grid gap-3 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
+        >
+          <div>
+            <label htmlFor="member-search" className="label mb-1.5 block text-ink-2">
+              Nom, @pseudo ou titre
             </label>
-            <div className="relative min-w-0 flex-1">
+            <div className="relative">
               <Search
                 size={16}
                 strokeWidth={1.75}
@@ -163,56 +316,146 @@ export default function MembersIndex({ members, filters, totalMembers }: Props) 
               <input
                 id="member-search"
                 type="search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Nom ou @pseudo"
+                value={draft.q}
+                onChange={(e) => setDraft({ ...draft, q: e.target.value })}
+                placeholder="Ngono, @ekane, développeuse…"
                 autoComplete="off"
                 spellCheck={false}
                 maxLength={60}
-                className="h-11 w-full rounded-sm border border-line-2 bg-card pr-3.5 pl-10 text-[15px] text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-muted/80 focus:border-ink focus:shadow-[0_0_0_3px_var(--js)] focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+                className={cn(inputClasses, 'pl-10')}
               />
             </div>
-            <Button type="submit" variant="secondary">
-              Chercher
-            </Button>
-          </form>
+          </div>
+          <div>
+            <label htmlFor="member-skill" className="label mb-1.5 block text-ink-2">
+              Compétence
+            </label>
+            <input
+              id="member-skill"
+              type="search"
+              value={draft.competence}
+              onChange={(e) => setDraft({ ...draft, competence: e.target.value })}
+              placeholder="React, Node.js…"
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={30}
+              className={inputClasses}
+            />
+          </div>
+          <div>
+            <label htmlFor="member-city" className="label mb-1.5 block text-ink-2">
+              Ville
+            </label>
+            <input
+              id="member-city"
+              type="search"
+              value={draft.ville}
+              onChange={(e) => setDraft({ ...draft, ville: e.target.value })}
+              placeholder="Douala, Yaoundé…"
+              autoComplete="off"
+              maxLength={60}
+              className={inputClasses}
+            />
+          </div>
+          <Button type="submit" variant="secondary">
+            Chercher
+          </Button>
+        </form>
+
+        <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <nav
+            aria-label="Disponibilité"
+            className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0"
+          >
+            <ul className="flex min-w-max gap-1">
+              {AVAILABILITIES.map((value) => (
+                <li key={value || 'all'}>
+                  <FilterPill
+                    href={href({ ...filters, disponibilite: value })}
+                    active={filters.disponibilite === value}
+                  >
+                    {value ? AVAILABILITY_SHORT_LABELS[value] : 'Tous'}
+                  </FilterPill>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           <nav aria-label="Trier les membres" className="flex shrink-0 gap-1">
-            {SORTS.map((sort) => {
-              const active = filters.sort === sort.value
+            {SORTS.map((sort) => (
+              <FilterPill
+                key={sort.value}
+                href={href({ ...filters, sort: sort.value })}
+                active={filters.sort === sort.value}
+              >
+                {sort.label}
+              </FilterPill>
+            ))}
+          </nav>
+        </div>
+
+        {popularSkills.length > 0 && (
+          <div className="mt-6 flex flex-wrap items-center gap-1.5">
+            <span className="label mr-1.5">Compétences fréquentes</span>
+            {popularSkills.map((skill) => {
+              const current =
+                Boolean(filters.competence) && sameSkill(skill.name, filters.competence)
               return (
                 <Link
-                  key={sort.value}
-                  href={href({ q: filters.q, sort: sort.value })}
-                  aria-current={active ? 'page' : undefined}
+                  key={skill.name}
+                  href={href({ ...filters, competence: current ? '' : skill.name })}
+                  aria-current={current ? 'true' : undefined}
                   preserveScroll
                   className={cn(
-                    'inline-flex h-9 items-center rounded-sm border px-3 font-mono text-[12px] font-medium tracking-[0.06em] uppercase transition-colors duration-150',
-                    active
+                    'inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-[13px] font-medium transition-colors duration-150',
+                    current
                       ? 'border-ink bg-js text-js-ink'
                       : 'border-line-2 text-ink-2 hover:border-ink hover:text-ink'
                   )}
                 >
-                  {sort.label}
+                  {skill.name}
+                  <span
+                    className={cn('font-mono text-[11px]', current ? 'text-js-ink' : 'text-muted')}
+                  >
+                    {skill.total}
+                  </span>
                 </Link>
               )
             })}
-          </nav>
-        </div>
+          </div>
+        )}
       </PageHeader>
 
       <section className="shell pt-8" aria-label="Liste des membres">
-        {filters.q && (
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <p className="label">
-              {plural(meta.total, 'résultat', 'résultats', 'Aucun résultat')} pour{' '}
-              <span className="text-ink normal-case">« {filters.q} »</span>
-            </p>
+        {filtered && (
+          <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="label">{plural(meta.total, 'membre', 'membres', 'Aucun membre')} ·</p>
+            <ul className="flex flex-wrap items-center gap-1.5">
+              {active.map((item) => (
+                <li key={item.key}>
+                  <Link
+                    href={href({ ...filters, [item.key]: '' })}
+                    preserveScroll
+                    className="inline-flex h-7 items-center gap-1.5 rounded-sm border border-ink px-2 text-[13px] font-medium text-ink transition-colors duration-150 hover:bg-ink hover:text-paper"
+                  >
+                    {item.label}
+                    <X size={12} strokeWidth={2} aria-hidden="true" />
+                    <span className="sr-only">(retirer ce filtre)</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
             <Link
-              href={href({ q: '', sort: filters.sort })}
+              href={href({
+                q: '',
+                competence: '',
+                disponibilite: '',
+                ville: '',
+                sort: filters.sort,
+              })}
               className="label inline-flex items-center gap-1 text-ink hover:underline"
             >
-              <X size={12} aria-hidden="true" /> Effacer
+              Tout effacer
             </Link>
           </div>
         )}
@@ -228,18 +471,32 @@ export default function MembersIndex({ members, filters, totalMembers }: Props) 
             </div>
             <ol className="border-b border-line lg:border-t-0">
               {members.data.map((member, i) => (
-                <MemberRow key={member.id} member={member} index={offset + i + 1} />
+                <MemberRow
+                  key={member.id}
+                  member={member}
+                  index={offset + i + 1}
+                  competence={filters.competence}
+                />
               ))}
             </ol>
             <Pagination meta={meta} className="mt-10 border-t-0" />
           </>
-        ) : filters.q ? (
+        ) : filtered ? (
           <EmptyState
             code="MBR"
-            title={<>Personne ne répond à « {filters.q} ».</>}
-            description="Vérifiez l’orthographe, ou cherchez par nom d’utilisateur (sans le @)."
+            title="Personne ne correspond à ces critères."
+            description="Retirez un filtre, vérifiez l’orthographe de la compétence ou de la ville, ou cherchez par nom d’utilisateur (sans le @)."
             action={
-              <ButtonLink href={href({ q: '', sort: filters.sort })} variant="secondary">
+              <ButtonLink
+                href={href({
+                  q: '',
+                  competence: '',
+                  disponibilite: '',
+                  ville: '',
+                  sort: filters.sort,
+                })}
+                variant="secondary"
+              >
                 Voir tous les membres
               </ButtonLink>
             }

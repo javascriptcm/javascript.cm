@@ -20,6 +20,7 @@ export const controllers = {
     Register: () => import('#controllers/auth/register_controller'),
     Social: () => import('#controllers/auth/social_controller'),
   },
+  Cv: () => import('#controllers/cv_controller'),
   Dashboard: () => import('#controllers/dashboard_controller'),
   DiscussionActions: () => import('#controllers/discussion_actions_controller'),
   Discussions: () => import('#controllers/discussions_controller'),

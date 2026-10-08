@@ -108,9 +108,15 @@ export interface ApiDefinition {
     account: typeof routes['settings.account'] & {
       destroy: typeof routes['settings.account.destroy']
     }
+    cv: typeof routes['settings.cv'] & {
+      store: typeof routes['settings.cv.store']
+      destroy: typeof routes['settings.cv.destroy']
+      visibility: typeof routes['settings.cv.visibility']
+    }
   }
   profile: {
     show: typeof routes['profile.show']
+    cv: typeof routes['profile.cv']
   }
   admin: {
     index: typeof routes['admin.index']

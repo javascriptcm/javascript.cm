@@ -3,9 +3,23 @@
 (app) {
 	encode zstd gzip
 
-	# No uploads on the site: cap request bodies (articles are < 100 KB).
-	request_body {
+	# Cap request bodies (articles are < 100 KB)…
+	@regular_body not {
+		method POST
+		path /settings/cv
+	}
+	request_body @regular_body {
 		max_size 1MB
+	}
+
+	# …except the only upload of the site: the CV (PDF, 5 MB max, checked
+	# again by the app, which also caps the multipart body at 6 MB).
+	@cv_upload {
+		method POST
+		path /settings/cv
+	}
+	request_body @cv_upload {
+		max_size 6MB
 	}
 
 	header {

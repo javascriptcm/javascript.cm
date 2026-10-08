@@ -19,14 +19,36 @@ export function likePattern(value: string) {
   return `%${value.replace(/[\\%_]/g, (char) => `\\${char}`)}%`
 }
 
+const AVAILABILITY_FILTERS = ['open_to_work', 'freelance', 'hiring'] as const
+type AvailabilityFilter = (typeof AVAILABILITY_FILTERS)[number]
+
+/**
+ * Query-string text filter: trimmed, single-spaced, bounded.
+ */
+function textFilter(value: unknown, max: number) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max)
+}
+
 export default class MembersController {
   /**
    * GET /membres — searchable directory of the community.
+   * Filters: ?q= (name, @username, headline), ?competence= (exact skill,
+   * case-insensitive), ?disponibilite=open_to_work|freelance|hiring,
+   * ?ville= (accent-insensitive "contains" on the location).
    */
   async index({ request, inertia }: HttpContext) {
-    const q = String(request.input('q') ?? '')
-      .trim()
-      .slice(0, 60)
+    const q = textFilter(request.input('q'), 60)
+    const competence = textFilter(request.input('competence'), 30).replace(/^#+/, '')
+    const requestedAvailability = request.input('disponibilite')
+    const disponibilite: AvailabilityFilter | '' = AVAILABILITY_FILTERS.includes(
+      requestedAvailability
+    )
+      ? requestedAvailability
+      : ''
+    const ville = textFilter(request.input('ville'), 60)
     const sort: 'recents' | 'actifs' = request.input('sort') === 'actifs' ? 'actifs' : 'recents'
     const page = Math.max(1, Number.parseInt(request.input('page', '1'), 10) || 1)
 
@@ -40,8 +62,25 @@ export default class MembersController {
     if (q) {
       const pattern = likePattern(q.replace(/^@/, ''))
       query.where((builder) => {
-        builder.whereILike('users.username', pattern).orWhereILike('users.name', pattern)
+        builder
+          .whereILike('users.username', pattern)
+          .orWhereILike('users.name', pattern)
+          .orWhereILike('users.headline', pattern)
       })
+    }
+    if (competence) {
+      query.whereRaw(
+        `exists (select 1 from jsonb_array_elements_text(users.skills) as skill(name) where lower(skill.name) = lower(?))`,
+        [competence]
+      )
+    }
+    if (disponibilite) {
+      query.where('users.availability', disponibilite)
+    }
+    if (ville) {
+      query.whereRaw(`unaccent(coalesce(users.location, '')) ilike unaccent(?)`, [
+        likePattern(ville),
+      ])
     }
 
     if (sort === 'actifs') {
@@ -51,7 +90,7 @@ export default class MembersController {
     }
     query.orderBy('users.created_at', 'desc').orderBy('users.id', 'desc')
 
-    const [paginator, total] = await Promise.all([
+    const [paginator, total, popularSkills] = await Promise.all([
       query.paginate(page, 30),
       db
         .from('users')
@@ -59,14 +98,35 @@ export default class MembersController {
         .count('* as total')
         .first()
         .then((row) => Number(row?.total ?? 0)),
+      this.popularSkills(),
     ])
 
     return inertia.render('members/index', {
       members: UserTransformer.paginate(paginator.all(), paginator.getMeta()).useVariant(
         'forDirectory'
       ),
-      filters: { q, sort },
+      filters: { q, sort, competence, disponibilite, ville },
       totalMembers: total,
+      popularSkills,
     })
+  }
+
+  /**
+   * The most declared skills (shortcuts for the "?competence=" filter),
+   * each with its most common spelling.
+   */
+  private async popularSkills() {
+    const result = await db.rawQuery(
+      `select mode() within group (order by skill.name) as name, count(*)::int as total
+       from users, jsonb_array_elements_text(users.skills) as skill(name)
+       where users.banned_at is null
+       group by lower(skill.name)
+       order by total desc, lower(skill.name) asc
+       limit 12`
+    )
+    return (result.rows as { name: string; total: number }[]).map((row) => ({
+      name: row.name,
+      total: Number(row.total),
+    }))
   }
 }

@@ -35,6 +35,9 @@ services:
         condition: service_healthy
     ports:
       - '127.0.0.1:3333:3333'
+    volumes:
+      # Members' CVs (storage/cvs): outside the image, backed up by deploy/backup.sh.
+      - uploads:/app/storage
     networks: [internal]
     logging:
       driver: json-file
@@ -44,6 +47,7 @@ services:
 
 volumes:
   pgdata:
+  uploads:
 
 networks:
   internal:

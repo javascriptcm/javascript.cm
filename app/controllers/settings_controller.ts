@@ -1,13 +1,17 @@
 import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
+import logger from '@adonisjs/core/services/logger'
 import db from '@adonisjs/lucid/services/db'
 import {
   deleteAccountValidator,
   normalizeHandle,
+  normalizeLinks,
+  normalizeSkills,
   passwordSettingsValidator,
   profileSettingsValidator,
 } from '#validators/settings_validator'
+import { deleteCv } from '#services/cv_storage'
 
 /**
  * Account settings of the signed-in member (profile, password, deletion).
@@ -31,6 +35,11 @@ export default class SettingsController {
       'githubUsername',
       'twitterUsername',
       'linkedinUsername',
+      'headline',
+      'availability',
+      'skills',
+      'portfolioUrl',
+      'links',
     ])
 
     const data = await profileSettingsValidator.validate(
@@ -39,6 +48,8 @@ export default class SettingsController {
         githubUsername: normalizeHandle(input.githubUsername, 'github'),
         twitterUsername: normalizeHandle(input.twitterUsername, 'twitter'),
         linkedinUsername: normalizeHandle(input.linkedinUsername, 'linkedin'),
+        skills: input.skills === undefined ? undefined : normalizeSkills(input.skills),
+        links: input.links === undefined ? undefined : normalizeLinks(input.links),
       },
       { meta: { userId: user.id } }
     )
@@ -61,6 +72,14 @@ export default class SettingsController {
       twitterUsername: data.twitterUsername,
       linkedinUsername: data.linkedinUsername,
     })
+    // Professional fields absent from the payload keep their value.
+    if (data.headline !== undefined) user.headline = data.headline
+    if (data.availability !== undefined) user.availability = data.availability
+    if (data.skills !== undefined) user.skills = data.skills
+    if (data.portfolioUrl !== undefined) user.portfolioUrl = data.portfolioUrl
+    if (data.links !== undefined) {
+      user.links = data.links.map(({ label, url }) => ({ label, url }))
+    }
     await user.save()
 
     session.flash(
@@ -210,6 +229,11 @@ export default class SettingsController {
             ),
           })
       }
+    })
+
+    // The account is gone: its CV must not outlive it on the disk.
+    await deleteCv(user.cvPath).catch((error) => {
+      logger.error({ err: error, userId: user.id }, 'could not delete the CV of a deleted account')
     })
 
     await auth.use('web').logout()

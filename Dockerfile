@@ -34,7 +34,13 @@ ENV NODE_ENV=production \
 COPY --from=production-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/build ./
 COPY --chown=node:node docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh && mkdir -p tmp && chown node:node tmp
+# storage/ holds the uploaded CVs: the "uploads" volume is mounted there
+# (docker-compose.yml). Docker seeds an empty named volume with this
+# directory's ownership, so the app (user "node") can write to it.
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+  && mkdir -p tmp storage/cvs \
+  && chown node:node tmp storage storage/cvs \
+  && chmod 750 storage storage/cvs
 USER node
 EXPOSE 3333
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \

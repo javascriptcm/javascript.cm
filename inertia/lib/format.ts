@@ -60,3 +60,11 @@ export function plural(count: number, singular: string, pluralForm?: string, zer
 export function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ')
 }
+
+/** "312 Ko", "1,4 Mo" (French units, base 1024). */
+export function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${formatNumber(bytes)} o`
+  if (bytes < 1024 * 1024) return `${formatNumber(Math.round(bytes / 1024))} Ko`
+  const mb = bytes / (1024 * 1024)
+  return `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(mb)} Mo`
+}

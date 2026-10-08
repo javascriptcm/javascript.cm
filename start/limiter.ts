@@ -59,3 +59,30 @@ export const previewThrottle = limiter.define('preview', (ctx) => {
     .every('5 minutes')
     .usingKey(`preview_${ctx.auth.user?.id ?? ctx.request.ip()}`)
 })
+
+/**
+ * CV uploads (on top of actionThrottle), keyed by user: each upload writes
+ * up to 5 MB to the disk.
+ */
+export const cvUploadThrottle = limiter.define('cv_upload', (ctx) => {
+  return limiter
+    .allowRequests(app.inProduction ? 10 : 1000)
+    .every('10 minutes')
+    .usingKey(`cv_upload_${ctx.auth.user?.id ?? ctx.request.ip()}`)
+    .limitExceeded((error) => {
+      error.setMessage('Trop d’envois de CV en peu de temps. Réessayez dans quelques minutes.')
+    })
+})
+
+/**
+ * CV downloads, keyed by IP (scraping protection).
+ */
+export const cvDownloadThrottle = limiter.define('cv_download', (ctx) => {
+  return limiter
+    .allowRequests(app.inProduction ? 30 : 1000)
+    .every('1 minute')
+    .usingKey(`cv_download_${ctx.request.ip()}`)
+    .limitExceeded((error) => {
+      error.setMessage('Trop de téléchargements. Réessayez dans une minute.')
+    })
+})

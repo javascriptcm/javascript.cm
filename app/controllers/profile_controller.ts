@@ -10,6 +10,7 @@ import ThreadTransformer from '#transformers/thread_transformer'
 import DiscussionTransformer from '#transformers/discussion_transformer'
 import UserTransformer from '#transformers/user_transformer'
 import { plainExcerpt } from '#services/markdown'
+import { cvAccess, cvUrl } from '#controllers/cv_controller'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
 export const PROFILE_TABS = ['articles', 'questions', 'discussions', 'reponses'] as const
@@ -131,10 +132,21 @@ export default class ProfileController {
 
     const tabData = await this.tabData(profile, tab, page)
 
+    const isOwner = viewer?.id === profile.id
+    const access = cvAccess(profile, viewer)
+
     return inertia.render('profile/show', {
       profile: UserTransformer.transform(profile).useVariant('forProfile'),
       banned: profile.isBanned,
-      isOwner: viewer?.id === profile.id,
+      isOwner,
+      // Computed for this viewer: whether a CV exists is only revealed to
+      // the people allowed to read it (and to guests for members-only CVs).
+      cv: {
+        available: access === 'allowed',
+        loginRequired: access === 'login',
+        url: access === 'hidden' ? null : cvUrl(profile.username),
+        visibility: isOwner && access === 'allowed' ? profile.cvVisibility : null,
+      },
       stats,
       tab,
       ...tabData,

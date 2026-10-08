@@ -4,6 +4,9 @@ build
 tmp/*
 !tmp/.gitkeep
 
+# Uploaded files (members' CVs): never committed
+storage/
+
 # Secrets
 .env
 .env.local
