@@ -1,5 +1,6 @@
 # /etc/caddy/Caddyfile — managed by javascript.cm deploy
-staging.javascript.cm {
+
+(app) {
 	encode zstd gzip
 
 	# No uploads on the site: cap request bodies (articles are < 100 KB).
@@ -26,4 +27,20 @@ staging.javascript.cm {
 
 	# Access logs go to journald: journalctl -u caddy
 	log
+}
+
+staging.javascript.cm {
+	import app
+}
+
+# Temporary: direct access by IP until the staging DNS points here.
+# Let's Encrypt issues IP certificates with the short-lived profile
+# (about 6 days, renewed automatically by Caddy).
+169.58.106.105 {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+	import app
 }
