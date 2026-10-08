@@ -225,7 +225,7 @@ test.group('Sessions', (group) => {
       .withSession({ session_version: 0 })
       .redirects(0)
     stale.assertStatus(302)
-    assert.match(stale.header('location'), /^\/login/)
+    assert.match(stale.header('location') ?? '', /^\/login/)
 
     // The current session was re-stamped and keeps working.
     const current = await client.get('/dashboard').loginAs(user).withSession({ session_version: 1 })
