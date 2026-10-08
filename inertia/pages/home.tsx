@@ -59,7 +59,7 @@ export default function Home({ stats, articles, threads, discussions, members }:
               className="text-[clamp(4rem,14vw,10rem)] leading-[0.84] font-extrabold tracking-[-0.06em] lg:col-span-9"
             >
               <span className="rise block">Le 237</span>
-              <span className="rise rise-1 block pl-[0.08em] font-mono text-[0.3em] leading-[1.5] font-medium tracking-[-0.02em] text-ink-2 sm:pl-[1.4em]">
+              <span className="rise rise-1 block py-[0.12em] pl-[0.12em] font-mono text-[0.3em] leading-[1.3] font-medium tracking-[-0.02em] text-ink-2">
                 code en
               </span>
               <span className="rise rise-2 block">
@@ -98,21 +98,23 @@ export default function Home({ stats, articles, threads, discussions, members }:
         </div>
 
         {/* Instrument readout */}
-        <dl className="shell grid grid-cols-2 border-t border-line lg:grid-cols-4">
-          {readings.map((reading, i) => (
-            <div
-              key={reading.label}
-              className={`py-6 ${i % 2 === 1 ? 'border-l border-line pl-5 sm:pl-8' : ''} ${i >= 2 ? 'border-t border-line lg:border-t-0' : ''} ${i === 2 ? 'lg:border-l lg:pl-8' : ''}`}
-            >
-              <dt className="label">
-                <span className="text-ink">{String(i + 1).padStart(2, '0')}</span> {reading.label}
-              </dt>
-              <dd className="mt-2 text-[clamp(2.2rem,4.5vw,3.4rem)] leading-none font-bold tracking-[-0.04em] tabular-nums">
-                {reading.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div className="border-t border-line">
+          <dl className="shell grid grid-cols-2 lg:grid-cols-4">
+            {readings.map((reading, i) => (
+              <div
+                key={reading.label}
+                className={`py-6 ${i % 2 === 1 ? 'border-l border-line pl-5 sm:pl-8' : ''} ${i >= 2 ? 'border-t border-line lg:border-t-0' : ''} ${i === 2 ? 'lg:border-l lg:pl-8' : ''}`}
+              >
+                <dt className="label">
+                  <span className="text-ink">{String(i + 1).padStart(2, '0')}</span> {reading.label}
+                </dt>
+                <dd className="mt-2 text-[clamp(2.2rem,4.5vw,3.4rem)] leading-none font-bold tracking-[-0.04em] tabular-nums">
+                  {reading.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
       <ArticlesSection articles={articles} />
@@ -178,11 +180,14 @@ export default function Home({ stats, articles, threads, discussions, members }:
           </div>
         </div>
         <aside className="lg:col-span-5" aria-labelledby="home-members">
-          <div className="border-t border-ink pt-5">
-            <p className="label text-ink" id="home-members">
-              <span className="mr-2 text-muted">[—]</span>Derniers arrivés
-            </p>
-            <ul className="mt-6 grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-4">
+          <SectionHeading
+            index="04"
+            label="Derniers arrivés"
+            title={<span id="home-members">Bienvenue à bord.</span>}
+            action={{ href: '/membres', label: 'L’annuaire' }}
+          />
+          <div>
+            <ul className="mt-8 grid grid-cols-4 gap-x-3 gap-y-5 sm:grid-cols-6 lg:grid-cols-4">
               {members.map((member) => (
                 <li key={member.id}>
                   <Link
@@ -202,12 +207,6 @@ export default function Home({ stats, articles, threads, discussions, members }:
                 </li>
               ))}
             </ul>
-            <Link
-              href="/membres"
-              className="mt-6 inline-flex items-center gap-2 font-mono text-[13px] font-medium tracking-[0.06em] uppercase"
-            >
-              <span className="link-draw">L’annuaire des membres</span> →
-            </Link>
           </div>
         </aside>
       </section>

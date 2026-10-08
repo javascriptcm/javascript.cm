@@ -86,7 +86,7 @@ export function ArticleFeature({
       {article.excerpt && (
         <p className="mt-5 max-w-2xl text-[17.5px] leading-relaxed text-ink-2">{article.excerpt}</p>
       )}
-      <Byline article={article} className="mt-auto pt-8" showStats={showStats} />
+      <Byline article={article} className="mt-6" showStats={showStats} />
     </article>
   )
 }
