@@ -1,3 +1,4 @@
+import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 import db from '@adonisjs/lucid/services/db'
@@ -96,10 +97,13 @@ export default class SettingsController {
 
     const hadPassword = user.password !== null
     user.password = password // hashed by the AuthFinder mixin
+    user.sessionVersion = user.sessionVersion + 1
     await user.save()
 
-    // Sign out the other devices that kept a "remember me" token.
+    // Sign out the other devices: their sessions carry the previous version
+    // (see SilentAuthMiddleware) and their "remember me" tokens are revoked.
     await db.from('remember_me_tokens').where('tokenable_id', user.id).delete()
+    session.put(SESSION_VERSION_KEY, user.sessionVersion)
 
     session.flash(
       'success',

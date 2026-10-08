@@ -197,3 +197,38 @@ test.group('Security regressions', (group) => {
     response.assertStatus(302)
   })
 })
+
+test.group('Sessions', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('changing the password signs out the other sessions', async ({ client, assert }) => {
+    const user = await makeUser()
+    const response = await client
+      .put('/settings/password')
+      .json({
+        currentPassword: 'motdepasse-solide',
+        password: 'nouveau-motdepasse',
+        passwordConfirmation: 'nouveau-motdepasse',
+      })
+      .withCsrfToken()
+      .loginAs(user)
+      .withSession({ session_version: 0 })
+      .redirects(0)
+    response.assertStatus(302)
+    await user.refresh()
+    assert.equal(user.sessionVersion, 1)
+
+    // Another device still holds a session stamped with version 0.
+    const stale = await client
+      .get('/dashboard')
+      .loginAs(user)
+      .withSession({ session_version: 0 })
+      .redirects(0)
+    stale.assertStatus(302)
+    assert.match(stale.header('location'), /^\/login/)
+
+    // The current session was re-stamped and keeps working.
+    const current = await client.get('/dashboard').loginAs(user).withSession({ session_version: 1 })
+    current.assertStatus(200)
+  })
+})

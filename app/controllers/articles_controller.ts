@@ -112,7 +112,7 @@ async function relatedArticles(article: Article) {
  */
 function assertVisible(article: Article, viewer: User | undefined) {
   if (article.isPublished) return
-  if (viewer && viewer.canManage(article.userId)) return
+  if (viewer && viewer.canSeeDraftsOf(article.userId)) return
   throw new lucidErrors.E_ROW_NOT_FOUND()
 }
 
@@ -237,7 +237,7 @@ export default class ArticlesController {
       comments: ReplyTransformer.transform(comments),
       related: ArticleTransformer.transform(related),
       likedByMe: Boolean(liked),
-      canManage: Boolean(viewer?.canManage(article.userId)),
+      canManage: Boolean(viewer && (await viewer.canManageContent(article.userId))),
     })
   }
 
@@ -280,7 +280,7 @@ export default class ArticlesController {
     const user = auth.user!
     const article = await Article.query().where('slug', params.slug).preload('tags').firstOrFail()
     assertVisible(article, user)
-    if (!user.canManage(article.userId)) {
+    if (!(await user.canManageContent(article.userId))) {
       session.flash('error', 'Seul l’auteur de cet article peut le modifier.')
       return response.redirect().toPath(`/articles/${article.slug}`)
     }
@@ -300,7 +300,7 @@ export default class ArticlesController {
     const user = auth.user!
     const article = await Article.findByOrFail('slug', params.slug)
     assertVisible(article, user)
-    if (!user.canManage(article.userId)) {
+    if (!(await user.canManageContent(article.userId))) {
       session.flash('error', 'Seul l’auteur de cet article peut le modifier.')
       return response.redirect().toPath(`/articles/${article.slug}`)
     }
@@ -346,7 +346,7 @@ export default class ArticlesController {
     const user = auth.user!
     const article = await Article.findByOrFail('slug', params.slug)
     assertVisible(article, user)
-    if (!user.canManage(article.userId)) {
+    if (!(await user.canManageContent(article.userId))) {
       session.flash('error', 'Vous ne pouvez pas supprimer cet article.')
       return response.redirect().toPath(`/articles/${article.slug}`)
     }

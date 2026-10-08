@@ -35,8 +35,14 @@ export function ReplyItem({
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const form = useForm({ body: reply.body })
+  // Same rule as User.canManageContent: owner, admins, or moderators on
+  // regular members' replies.
   const canManage = Boolean(
-    user && reply.author && (user.id === reply.author.id || user.isModerator)
+    user &&
+    reply.author &&
+    (user.id === reply.author.id ||
+      user.isAdmin ||
+      (user.isModerator && reply.author.role === 'member'))
   )
   const isMine = Boolean(user && reply.author && user.id === reply.author.id)
 

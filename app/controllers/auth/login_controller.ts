@@ -1,3 +1,4 @@
+import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import User from '#models/user'
 import { loginValidator } from '#validators/login_validator'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -31,6 +32,7 @@ export default class LoginController {
     }
 
     await auth.use('web').login(user, Boolean(remember))
+    session.put(SESSION_VERSION_KEY, user.sessionVersion)
     session.flash('success', `Bon retour, ${user.displayName} !`)
     return response.redirect().toPath(safeRedirectPath(request.input('redirect')))
   }

@@ -40,7 +40,7 @@ export default class ThreadActionsController {
    */
   async markSolution({ params, request, auth, response, session }: HttpContext) {
     const thread = await Thread.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(thread.userId)) {
+    if (!(await auth.user!.canManageContent(thread.userId))) {
       session.flash('error', 'Seul l’auteur de la question peut choisir la solution.')
       return response.redirect().back()
     }
@@ -67,7 +67,7 @@ export default class ThreadActionsController {
    */
   async unmarkSolution({ params, auth, response, session }: HttpContext) {
     const thread = await Thread.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(thread.userId)) {
+    if (!(await auth.user!.canManageContent(thread.userId))) {
       session.flash('error', 'Seul l’auteur de la question peut retirer la solution.')
       return response.redirect().back()
     }

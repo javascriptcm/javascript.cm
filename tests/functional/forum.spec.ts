@@ -122,3 +122,33 @@ test.group('Forum', (group) => {
     response.assertStatus(404)
   })
 })
+
+test.group('Moderation ranks', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('moderators manage members’ content, never other staff’s', async ({ client, assert }) => {
+    const moderator = await createUser({ role: 'moderator' })
+    const member = await createUser()
+    const admin = await createUser({ role: 'admin' })
+    const memberThread = await ask(client, member)
+    const adminThread = await ask(client, admin)
+
+    await client
+      .delete(`/forum/${adminThread.slug}`)
+      .withCsrfToken()
+      .loginAs(moderator)
+      .redirects(0)
+    assert.isNotNull(await Thread.find(adminThread.id))
+
+    await client
+      .delete(`/forum/${memberThread.slug}`)
+      .withCsrfToken()
+      .loginAs(moderator)
+      .redirects(0)
+    assert.isNull(await Thread.find(memberThread.id))
+
+    // Admins keep full rights.
+    await client.delete(`/forum/${adminThread.slug}`).withCsrfToken().loginAs(admin).redirects(0)
+    assert.isNull(await Thread.find(adminThread.id))
+  })
+})

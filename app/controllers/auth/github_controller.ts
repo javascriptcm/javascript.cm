@@ -1,3 +1,4 @@
+import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import { DateTime } from 'luxon'
 import string from '@adonisjs/core/helpers/string'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -84,6 +85,7 @@ export default class GithubController {
     }
 
     await auth.use('web').login(user, true)
+    session.put(SESSION_VERSION_KEY, user.sessionVersion)
     return response.redirect().toPath('/dashboard')
   }
 

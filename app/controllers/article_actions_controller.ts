@@ -11,7 +11,7 @@ import type User from '#models/user'
  */
 async function managedArticle(slug: string, user: User) {
   const article = await Article.findByOrFail('slug', slug)
-  if (user.canManage(article.userId)) return { article, allowed: true as const }
+  if (await user.canManageContent(article.userId)) return { article, allowed: true as const }
   if (!article.isPublished) throw new lucidErrors.E_ROW_NOT_FOUND()
   return { article, allowed: false as const }
 }

@@ -243,7 +243,7 @@ export default class ThreadsController {
       participantsCount: participantIds.length,
       similar: ThreadTransformer.transform(similar),
       can: {
-        manage: Boolean(viewer?.canManage(thread.userId)),
+        manage: Boolean(viewer && (await viewer.canManageContent(thread.userId))),
         moderate: Boolean(viewer?.isModerator),
       },
     })
@@ -254,7 +254,7 @@ export default class ThreadsController {
    */
   async edit({ params, auth, inertia, response, session }: HttpContext) {
     const thread = await Thread.query().where('slug', params.slug).preload('channel').firstOrFail()
-    if (!auth.user!.canManage(thread.userId)) {
+    if (!(await auth.user!.canManageContent(thread.userId))) {
       session.flash('error', 'Vous ne pouvez pas modifier cette question.')
       return response.redirect().toPath(`/forum/${thread.slug}`)
     }
@@ -270,7 +270,7 @@ export default class ThreadsController {
    */
   async update({ params, request, auth, response, session }: HttpContext) {
     const thread = await Thread.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(thread.userId)) {
+    if (!(await auth.user!.canManageContent(thread.userId))) {
       session.flash('error', 'Vous ne pouvez pas modifier cette question.')
       return response.redirect().toPath(`/forum/${thread.slug}`)
     }
@@ -290,7 +290,7 @@ export default class ThreadsController {
    */
   async destroy({ params, auth, response, session }: HttpContext) {
     const thread = await Thread.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(thread.userId)) {
+    if (!(await auth.user!.canManageContent(thread.userId))) {
       session.flash('error', 'Vous ne pouvez pas supprimer cette question.')
       return response.redirect().toPath(`/forum/${thread.slug}`)
     }

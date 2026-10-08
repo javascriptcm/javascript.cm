@@ -11,7 +11,7 @@ import { deleteReply, replyLocation, updateReply } from '#services/reply_service
 export default class RepliesController {
   async update({ params, request, auth, response, session }: HttpContext) {
     const reply = await Reply.findOrFail(params.id)
-    if (!auth.user!.canManage(reply.userId)) {
+    if (!(await auth.user!.canManageContent(reply.userId))) {
       session.flash('error', 'Vous ne pouvez pas modifier cette réponse.')
       return response.redirect().back()
     }
@@ -23,7 +23,7 @@ export default class RepliesController {
 
   async destroy({ params, auth, response, session }: HttpContext) {
     const reply = await Reply.findOrFail(params.id)
-    if (!auth.user!.canManage(reply.userId)) {
+    if (!(await auth.user!.canManageContent(reply.userId))) {
       session.flash('error', 'Vous ne pouvez pas supprimer cette réponse.')
       return response.redirect().back()
     }

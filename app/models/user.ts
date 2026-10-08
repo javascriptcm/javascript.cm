@@ -54,9 +54,20 @@ export default class User extends compose(
   }
 
   /**
-   * Whether the user can edit/delete a piece of content owned by "ownerId".
+   * Drafts and other non-public content: visible to their owner and staff.
    */
-  canManage(ownerId: number) {
+  canSeeDraftsOf(ownerId: number) {
     return this.id === ownerId || this.isModerator
+  }
+
+  /**
+   * Edit/delete rights on content owned by "ownerId": the owner, admins,
+   * and moderators on regular members' content (never on other staff's).
+   */
+  async canManageContent(ownerId: number) {
+    if (this.id === ownerId || this.isAdmin) return true
+    if (!this.isModerator) return false
+    const owner = await User.query().select('role').where('id', ownerId).first()
+    return owner?.role === 'member'
   }
 }

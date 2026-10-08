@@ -227,7 +227,7 @@ export class ThreadSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['avatarUrl', 'bannedAt', 'bio', 'createdAt', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'id', 'linkedinUsername', 'location', 'name', 'password', 'role', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
+  static $columns = ['avatarUrl', 'bannedAt', 'bio', 'createdAt', 'email', 'emailVerifiedAt', 'githubId', 'githubUsername', 'id', 'linkedinUsername', 'location', 'name', 'password', 'role', 'sessionVersion', 'twitterUsername', 'updatedAt', 'username', 'websiteUrl'] as const
   $columns = UserSchema.$columns
   @column()
   declare avatarUrl: string | null
@@ -257,6 +257,8 @@ export class UserSchema extends BaseModel {
   declare password: string | null
   @column()
   declare role: 'member' | 'moderator' | 'admin'
+  @column()
+  declare sessionVersion: number
   @column()
   declare twitterUsername: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })

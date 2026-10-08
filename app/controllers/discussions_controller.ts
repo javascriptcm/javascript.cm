@@ -295,7 +295,7 @@ export default class DiscussionsController {
       related: DiscussionTransformer.transform(related),
       relatedByTags: tagRelated.length > 0,
       can: {
-        manage: Boolean(viewer?.canManage(discussion.userId)),
+        manage: Boolean(viewer && (await viewer.canManageContent(discussion.userId))),
         moderate: Boolean(viewer?.isModerator),
       },
     })
@@ -309,7 +309,7 @@ export default class DiscussionsController {
       .where('slug', params.slug)
       .preload('tags')
       .firstOrFail()
-    if (!auth.user!.canManage(discussion.userId)) {
+    if (!(await auth.user!.canManageContent(discussion.userId))) {
       session.flash('error', 'Vous ne pouvez pas modifier cette discussion.')
       return response.redirect().toPath(`/discussions/${discussion.slug}`)
     }
@@ -325,7 +325,7 @@ export default class DiscussionsController {
    */
   async update({ params, request, auth, response, session }: HttpContext) {
     const discussion = await Discussion.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(discussion.userId)) {
+    if (!(await auth.user!.canManageContent(discussion.userId))) {
       session.flash('error', 'Vous ne pouvez pas modifier cette discussion.')
       return response.redirect().toPath(`/discussions/${discussion.slug}`)
     }
@@ -349,7 +349,7 @@ export default class DiscussionsController {
    */
   async destroy({ params, auth, response, session }: HttpContext) {
     const discussion = await Discussion.findByOrFail('slug', params.slug)
-    if (!auth.user!.canManage(discussion.userId)) {
+    if (!(await auth.user!.canManageContent(discussion.userId))) {
       session.flash('error', 'Vous ne pouvez pas supprimer cette discussion.')
       return response.redirect().toPath(`/discussions/${discussion.slug}`)
     }

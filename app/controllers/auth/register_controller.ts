@@ -1,3 +1,4 @@
+import { SESSION_VERSION_KEY } from '#middleware/silent_auth_middleware'
 import User from '#models/user'
 import { registerValidator } from '#validators/register_validator'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -12,6 +13,7 @@ export default class RegisterController {
     const user = await User.create({ name, username, email, password, role: 'member' })
 
     await auth.use('web').login(user)
+    session.put(SESSION_VERSION_KEY, user.sessionVersion)
     session.flash('success', `Bienvenue dans la communauté, ${user.displayName} !`)
     return response.redirect().toPath('/dashboard')
   }
