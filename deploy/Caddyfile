@@ -1,5 +1,7 @@
 # /etc/caddy/Caddyfile — managed by javascript.cm deploy
 
+# Shared site configuration. {args[0]} = local port of the environment's app
+# container (staging 3333, production 3334, previews 40000+<pr>).
 (app) {
 	encode zstd gzip
 
@@ -27,14 +29,13 @@
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
-		X-Robots-Tag "noindex, nofollow"
 		-Server
 	}
 
 	@assets path /assets/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
 
-	reverse_proxy 127.0.0.1:3333 {
+	reverse_proxy 127.0.0.1:{args[0]} {
 		health_uri /up
 		health_interval 30s
 	}
@@ -43,8 +44,22 @@
 	log
 }
 
+# Environments that must stay out of search engines.
+(noindex) {
+	header X-Robots-Tag "noindex, nofollow"
+}
+
+javascript.cm {
+	import app 3334
+}
+
+www.javascript.cm {
+	redir https://javascript.cm{uri} permanent
+}
+
 staging.javascript.cm {
-	import app
+	import app 3333
+	import noindex
 }
 
 # Temporary: direct access by IP until the staging DNS points here.
@@ -56,5 +71,9 @@ staging.javascript.cm {
 			profile shortlived
 		}
 	}
-	import app
+	import app 3333
+	import noindex
 }
+
+# Pull request previews: one site file per PR, written by deploy/preview.sh.
+import /etc/caddy/previews/*.caddy

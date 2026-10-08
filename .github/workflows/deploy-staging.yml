@@ -1,8 +1,9 @@
-name: CI & staging deploy
+name: CI & deploy
 
 on:
   push:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, closed]
   workflow_dispatch:
 
 concurrency:
@@ -12,6 +13,7 @@ concurrency:
 jobs:
   check:
     name: Typecheck, tests & build
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -42,16 +44,16 @@ jobs:
       - run: node ace build
 
   deploy:
-    name: Deploy to staging.javascript.cm
+    name: Deploy ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
     needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     concurrency:
-      group: staging-deploy
+      group: deploy-${{ github.ref_name }}
       cancel-in-progress: false
     environment:
-      name: staging
-      url: https://staging.javascript.cm
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      url: ${{ github.ref == 'refs/heads/main' && 'https://javascript.cm' || 'https://staging.javascript.cm' }}
     steps:
       - name: Check deploy secrets
         id: secrets
@@ -71,7 +73,48 @@ jobs:
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           echo "${{ secrets.STAGING_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      # The key is restricted server-side (forced command): it can only run the deploy script.
+      # The key is restricted server-side (forced command deploy/dispatch.sh).
       - name: Deploy
         if: steps.secrets.outputs.ready == 'true'
-        run: ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} deploy
+        run: |
+          target=${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} "deploy $target"
+
+  preview:
+    name: Pull request preview
+    # Opt-in with the "preview" label; same-repository branches only (forks get no secrets).
+    # "check" is skipped when the PR is closed: always() still lets this job
+    # tear the preview down; otherwise it only runs after a green check.
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'preview') &&
+      (github.event.action == 'closed' || needs.check.result == 'success')
+    needs: [check]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.STAGING_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Create or update the preview
+        if: github.event.action != 'closed'
+        run: ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} "preview up ${{ github.event.pull_request.number }} ${{ github.event.pull_request.head.sha }}"
+      - name: Comment the preview URL
+        if: github.event.action == 'opened' || github.event.action == 'labeled'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
+            --body "Aperçu de cette PR : https://pr-${{ github.event.pull_request.number }}.preview.javascript.cm (mis à jour à chaque push, supprimé à la fermeture)."
+      - name: Remove the preview
+        if: github.event.action == 'closed'
+        run: ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_HOST }} "preview down ${{ github.event.pull_request.number }}"

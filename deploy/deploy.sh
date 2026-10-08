@@ -19,9 +19,12 @@ main() {
   docker compose build --pull app
   docker compose up -d --remove-orphans
 
-  echo "==> waiting for health check"
+  local port
+  port="$(grep -E '^APP_PORT=' .env | cut -d= -f2- || true)"
+  port="${port:-3333}"
+  echo "==> waiting for health check on port ${port}"
   for _ in $(seq 1 60); do
-    if curl -fsS http://127.0.0.1:3333/up >/dev/null 2>&1; then
+    if curl -fsS "http://127.0.0.1:${port}/up" >/dev/null 2>&1; then
       echo "==> healthy"
       docker image prune -f >/dev/null
       exit 0

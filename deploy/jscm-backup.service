@@ -1,9 +1,12 @@
 [Unit]
-Description=javascript.cm PostgreSQL backup
+Description=javascript.cm backups (databases, uploads, off-site copy)
 Wants=docker.service
-After=docker.service
+After=docker.service network-online.target
 
 [Service]
 Type=oneshot
 User=brightky
+# Off-site credentials (restic): RESTIC_REPOSITORY, RESTIC_PASSWORD,
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY — root-owned, mode 600.
+EnvironmentFile=-/etc/jscm/backup.env
 ExecStart=/home/brightky/apps/javascript.cm/deploy/backup.sh

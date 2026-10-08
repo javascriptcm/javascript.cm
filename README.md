@@ -74,12 +74,19 @@ Direction artistique : _un journal technique imprimé de la scène JavaScript ca
 
 ## Déploiement
 
-Le serveur exécute `docker-compose.yml` (application + PostgreSQL) ; Caddy, installé sur l’hôte, termine le TLS et relaie vers `127.0.0.1:3333` (`deploy/Caddyfile`).
+Un même serveur héberge plusieurs environnements, chacun étant un projet Docker Compose (application + PostgreSQL) derrière Caddy, installé sur l’hôte (`deploy/Caddyfile`, HTTPS automatique) :
 
-- Chaque push sur la branche `staging` lance le workflow GitHub Actions _Staging_ : typecheck + build, puis déploiement par SSH. La clé utilisée est restreinte côté serveur à une seule commande (`deploy/deploy.sh`).
-- Au démarrage, le conteneur applique les migrations et les seeders idempotents. Le contenu de démonstration (membres et publications fictifs) n’est inséré en production que si `SEED_DEMO=true`.
-- Déploiement manuel sur le serveur : `./deploy/deploy.sh staging`.
-- Sauvegardes : `deploy/backup.sh` (dump PostgreSQL compressé, rotation 14 jours dans `~/backups/jscm`) est lancé chaque nuit par le timer systemd `jscm-backup` (`deploy/jscm-backup.{service,timer}`). Restauration : `docker compose exec -T db pg_restore -U <user> -d <base> --clean --if-exists < fichier.dump`.
+| Environnement | Branche | Dossier sur le serveur | Port local | Adresse |
+| --- | --- | --- | --- | --- |
+| Production | `main` | `~/apps/javascript.cm-prod` | 3334 | https://javascript.cm |
+| Staging | `staging` | `~/apps/javascript.cm` | 3333 | https://staging.javascript.cm |
+| Aperçu de PR | branche de la PR | `~/apps/previews/pr-<n>` | 40000 + n | https://pr-&lt;n&gt;.preview.javascript.cm |
+
+- Le workflow GitHub Actions lance typecheck, tests et build sur chaque push et chaque PR, puis déploie `staging` et `main` sur leur environnement. La clé SSH utilisée est restreinte côté serveur à `deploy/dispatch.sh`, qui n’accepte que `deploy staging`, `deploy production`, `preview up <pr> <sha>` et `preview down <pr>`.
+- Aperçus : ajoutez le label `preview` à une PR (branche du dépôt, pas d’un fork) ; l’aperçu est mis à jour à chaque push et supprimé à la fermeture (3 aperçus au maximum). Nécessite un enregistrement DNS `*.preview.javascript.cm` vers le serveur.
+- Au démarrage, chaque conteneur applique les migrations et les seeders idempotents. Le contenu de démonstration fictif n’est inséré que si `SEED_DEMO=true` (staging et aperçus).
+- Sauvegardes : `deploy/backup.sh` (timer systemd `jscm-backup`, chaque nuit) sauvegarde la base et les fichiers envoyés de chaque environnement, garde 14 jours en local et, si `/etc/jscm/backup.env` est rempli (voir `deploy/backup.env.example`), envoie une copie chiffrée hors du serveur avec restic (Cloudflare R2, Backblaze B2 ou tout stockage S3). Restauration : voir l’en-tête du script.
+- Déploiement manuel : `./deploy/deploy.sh <branche>` depuis le dossier de l’environnement.
 
 ## Contribuer
 

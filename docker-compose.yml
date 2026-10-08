@@ -1,6 +1,9 @@
-# Staging / production stack. Caddy runs on the host and proxies to
-# 127.0.0.1:3333. Secrets live in ".env" next to this file (not committed).
-name: jscm
+# One stack per environment (staging, production, PR previews). Caddy runs
+# on the host and proxies to 127.0.0.1:${APP_PORT}. Secrets and the two
+# variables below live in ".env" next to this file (not committed):
+#   COMPOSE_PROJECT_NAME  jscm (staging) · jscm-prod · jscm-pr-<n>
+#   APP_PORT              3333 (staging) · 3334 (production) · 40000+<n>
+name: ${COMPOSE_PROJECT_NAME:-jscm}
 
 services:
   db:
@@ -34,7 +37,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - '127.0.0.1:3333:3333'
+      - '127.0.0.1:${APP_PORT:-3333}:3333'
     volumes:
       # Members' CVs (storage/cvs): outside the image, backed up by deploy/backup.sh.
       - uploads:/app/storage
