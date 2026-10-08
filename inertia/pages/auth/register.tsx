@@ -136,7 +136,7 @@ export default function Register() {
         Déjà membre ?{' '}
         <Link
           href="/login"
-          className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js"
+          className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js hover:text-js-ink"
         >
           Se connecter
         </Link>

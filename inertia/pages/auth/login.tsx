@@ -84,7 +84,7 @@ export default function Login({ redirect }: { redirect: string }) {
         Pas encore membre ?{' '}
         <Link
           href="/register"
-          className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js"
+          className="font-semibold text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js hover:text-js-ink"
         >
           Créer un compte
         </Link>

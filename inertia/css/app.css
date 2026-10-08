@@ -26,6 +26,10 @@
   --ok: #0b7a53;
   --danger: #b4152b;
   --grain-opacity: 0.05;
+  --mark-height: 0.42em;
+  --mark-position: 0 88%;
+  --mark-color: inherit;
+  --mark-padding: 0.04em;
   color-scheme: light;
 }
 
@@ -43,6 +47,12 @@
   --ok: #45c08c;
   --danger: #ff6b6b;
   --grain-opacity: 0.035;
+  /* Cap height to descender, not the whole content box: tight display
+     line-heights would otherwise let the block bleed over the line above. */
+  --mark-height: 0.96em;
+  --mark-position: 0 80%;
+  --mark-color: var(--js-ink);
+  --mark-padding: 0.08em;
   color-scheme: dark;
 }
 
@@ -166,14 +176,17 @@
   padding-inline: clamp(16px, 4vw, 40px);
 }
 
-/* Highlighter: the JS-yellow marker sweeps under the text. */
+/* Highlighter: the JS-yellow marker sweeps under the text.
+   Light theme: a half-height band under dark ink. Dark theme: the text is
+   light, so the marker becomes a full block with ink text (like the JS
+   logo) — light text on yellow would be unreadable. */
 @utility mark {
   background-image: linear-gradient(var(--js), var(--js));
   background-repeat: no-repeat;
-  background-position: 0 88%;
-  background-size: 100% 0.42em;
-  color: inherit;
-  padding-inline: 0.04em;
+  background-position: var(--mark-position);
+  background-size: 100% var(--mark-height);
+  color: var(--mark-color);
+  padding-inline: var(--mark-padding);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
@@ -226,10 +239,10 @@
 
 @keyframes mark-sweep {
   from {
-    background-size: 0% 0.42em;
+    background-size: 0% var(--mark-height);
   }
   to {
-    background-size: 100% 0.42em;
+    background-size: 100% var(--mark-height);
   }
 }
 

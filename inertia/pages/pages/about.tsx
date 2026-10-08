@@ -48,7 +48,7 @@ export default function About() {
             tout l’écosystème ont leur place. Le site s’inspire de{' '}
             <a
               href="https://laravel.cm"
-              className="font-medium text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js"
+              className="font-medium text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js hover:text-js-ink"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -90,7 +90,7 @@ export default function About() {
               à{' '}
               <a
                 href="mailto:support@javascript.cm"
-                className="font-medium text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js"
+                className="font-medium text-ink underline decoration-js decoration-2 underline-offset-4 hover:bg-js hover:text-js-ink"
               >
                 support@javascript.cm
               </a>
